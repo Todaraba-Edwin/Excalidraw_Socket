@@ -1,0 +1,43 @@
+
+/* excalidraw 레이아웃 */
+.layer-ui__wrapper__top-right,
+.layer-ui__wrapper__footer-right,
+label[title="라이브러리"]  {
+  display: none !important;
+}
+
+/* .excalidraw .Stack Stack_vertical App-menu_top__left */
+button[aria-label="열기"],
+button[aria-label="다른 이름으로 저장..."],
+button[aria-label="도움말"],
+button[aria-label="다크 모드"],
+button[aria-label="다크 모드"] + div,
+button[aria-label="캔버스 초기화"]+div,
+.dropdown-menu-group,
+.dropdown-menu-group+div {
+  display: none !important;
+}
+
+/* Stack.Stack_horizontal */
+.Stack.Stack_horizontal {
+  label[title="지우개 — E 또는 0"] + div,
+  .dropdown-menu-button.App-toolbar__extra-tools-trigger.zen-mode-transition {
+    display: none !important;
+  }
+}
+
+/* .HintViewer  */
+
+/* .excalidraw .panelColumn*/
+.Island.App-menu__left {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  .panelColumn > div:not(:first-child),
+  .panelColumn > fieldset:not(:first-child),
+  .panelColumn .control-label {
+    display: none !important;
+  }
+}
+
