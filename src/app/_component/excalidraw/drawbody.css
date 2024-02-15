@@ -2,7 +2,8 @@
 /* excalidraw 레이아웃 */
 .layer-ui__wrapper__top-right,
 .layer-ui__wrapper__footer-right,
-label[title="라이브러리"]  {
+label[title="라이브러리"],
+.HintViewer  {
   display: none !important;
 }
 
@@ -38,6 +39,18 @@ button[aria-label="캔버스 초기화"]+div,
   .panelColumn > fieldset:not(:first-child),
   .panelColumn .control-label {
     display: none !important;
+  }
+}
+
+.App-mobile-menu {
+  .panelColumn > div:not(:first-child),
+  .panelColumn > fieldset:not(:first-child),
+  .panelColumn .control-label {
+    display: none !important;
+  }
+
+  .panelColumn > div:first-child {
+    margin: 0 auto;
   }
 }
 
