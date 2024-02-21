@@ -30,7 +30,6 @@ const ExcalidrawWrapper: React.FC = () => {
 
   const handleChange = (excalidrawElements:readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
     const socket = socketRef.current
-    
     // stream_add_Element
     if(pointerState ===  pointerStateEnm.DOWN && excalidrawElementsSlice.length < excalidrawElements.length) {
       if(excalidrawElements.at(-1) && socketRef.current) {
@@ -44,7 +43,7 @@ const ExcalidrawWrapper: React.FC = () => {
       .filter(({x, y},idx) => excalidrawElementsSlice[idx].x != x || excalidrawElementsSlice[idx].y != y) || []
 
     if(!!findElements.length) {
-      const ownElement = findElements.filter(({groupIds}) => groupIds.includes(userId)) || []
+      const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
 
       if(!!ownElement.length) {
         dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
@@ -64,8 +63,8 @@ const ExcalidrawWrapper: React.FC = () => {
     // move_strokeColor
     if(pointerState === pointerStateEnm.UP && excalidrawElementsSlice.length === excalidrawElements.length) {
       const findElements = excalidrawElements.filter(({strokeColor},idx) => excalidrawElementsSlice[idx].strokeColor != strokeColor)
-      const ownElements =  findElements.filter(({groupIds}) => groupIds.includes(userId)) || []
-      const otherElements =  findElements.filter(({groupIds}) => !groupIds.includes(userId)) || []
+      const ownElements =  findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
+      const otherElements =  findElements.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
       const socket = socketRef.current
 
       if(Boolean(ownElements.length) && !Boolean(otherElements.length)) {
@@ -156,18 +155,17 @@ const ExcalidrawWrapper: React.FC = () => {
 
         // addElements
         if(excalidrawElementsSliceLeng < activeSceneElementsLeng) {
-          const addElement = {...activeSceneElements.at(-1), groupIds:[userId] }
-          dispatch(Redux.addElements(addElement as ExcalidrawElement))
-          socket.emit("add_message", { room: ROOM_NAME, message: addElement})
+          dispatch(Redux.addElements({userId, data: activeSceneElements.at(-1) as ExcalidrawElement}))
+          socket.emit("add_message", { room: ROOM_NAME, message: {userId, data: activeSceneElements.at(-1) as ExcalidrawElement}})
         }
 
-        // moveElements 색상 변경 수정 
+        // moveElements
         if(excalidrawElementsSliceLeng === activeSceneElementsLeng) {
           const findElements = activeSceneElements
             .filter(({x, y},idx) => excalidrawElementsSlice[idx].x != x || excalidrawElementsSlice[idx].y != y) || []
 
           if(!!findElements.length) {
-            const ownElement = findElements.filter(({groupIds}) => groupIds.includes(userId)) || []
+            const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
 
             if(!!ownElement.length) {
               dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
@@ -187,15 +185,17 @@ const ExcalidrawWrapper: React.FC = () => {
         // removeElements
         if(excalidrawElementsSliceLeng > activeSceneElementsLeng) {
           const removeElementsIds = excalidrawAPI?.getSceneElementsIncludingDeleted()
-            .filter(({isDeleted}) => isDeleted).filter(({groupIds}) => groupIds.includes(userId))
+            .filter(({isDeleted}) => isDeleted).filter(({frameId}) => frameId && frameId.includes(userId))
             .map(({id}) => id) || []
             dispatch(Redux.removeElements(removeElementsIds))
           if(!!removeElementsIds.length)  {   
             socket.emit("remove_message", { room: ROOM_NAME, message: removeElementsIds})  
           }
         }  
+
       }
     }
+    
  },[ischangeElement])
 
  useEffect(()=>{

@@ -19,11 +19,14 @@ export const excalidrawSlice = createSlice({
           return el
         })
     },
-    addElements: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
-        console.log('리덕스_addElements');
-        const streamArr = state.find(({id}) => id === payload.id)
-        return !Boolean(streamArr) ? [...state, payload] : state
-    },
+    addElements: (state, {payload:{userId, data}}: PayloadAction<{
+      userId : string,
+      data : ExcalidrawElement
+    }>) => {
+      console.log('리덕스_addElements');
+      const streamArr = state.find(({id}) => id === data.id)    
+      return !Boolean(streamArr) ? [...state, {...data, frameId:userId}] : state
+  },
     changeElments: (state,{payload}:PayloadAction<ExcalidrawElement[]>) => {
       console.log('리덕스_changeElments', payload);
       const changeElementsIds = payload.map(({id}) => id)
