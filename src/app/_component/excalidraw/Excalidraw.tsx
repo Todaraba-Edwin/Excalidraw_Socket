@@ -1,6 +1,6 @@
-
 import React from 'react'
 import dynamic from "next/dynamic";
+import StoreProvider from '../StoreProvider';
 
 const ExcalidrawWrapper = dynamic(
   async () => (await import("./DrawBody")).default,
@@ -10,5 +10,10 @@ const ExcalidrawWrapper = dynamic(
 )
 
 export function Excalidraw() {
-  return <ExcalidrawWrapper/>
+  return (
+      <StoreProvider>
+        <ExcalidrawWrapper/>
+      </StoreProvider>
+  )
+  
 }

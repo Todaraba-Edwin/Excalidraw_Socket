@@ -54,3 +54,10 @@ button[aria-label="캔버스 초기화"]+div,
   }
 }
 
+
+.App-toolbar-content {
+  .ToolIcon_type_button.ToolIcon_size_medium.ToolIcon_type_button--show.ToolIcon[aria-label="삭제"],
+  .ToolIcon_type_button.ToolIcon_size_medium.ToolIcon_type_button--show.ToolIcon[aria-label="복제"] {
+    display: none !important;
+  }
+}
