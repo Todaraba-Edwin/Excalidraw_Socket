@@ -30,6 +30,14 @@ const ExcalidrawWrapper: React.FC = () => {
 
   const handleChange = (excalidrawElements:readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
     const socket = socketRef.current
+    console.log(`
+    ================================================================ handleChange
+    excalidrawElements = ${excalidrawElements[0]?.strokeColor}
+    pointerState = ${pointerState}
+    excalidrawElementsSlice.length = ${excalidrawElementsSlice.length}
+    excalidrawElements.length = ${excalidrawElements.length}
+`);
+
     // stream_add_Element
     if(pointerState ===  pointerStateEnm.DOWN && excalidrawElementsSlice.length < excalidrawElements.length) {
       if(excalidrawElements.at(-1) && socketRef.current) {
@@ -44,7 +52,6 @@ const ExcalidrawWrapper: React.FC = () => {
 
     if(!!findElements.length) {
       const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
-
       if(!!ownElement.length) {
         dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
         socket.emit("move_message", { room: ROOM_NAME, message: ownElement})
@@ -60,12 +67,23 @@ const ExcalidrawWrapper: React.FC = () => {
     } 
     }
     
-    // move_strokeColor
+    // change_strokeColor
     if(pointerState === pointerStateEnm.UP && excalidrawElementsSlice.length === excalidrawElements.length) {
-      const findElements = excalidrawElements.filter(({strokeColor},idx) => excalidrawElementsSlice[idx].strokeColor != strokeColor)
+      const findElements = excalidrawElementsSlice
+        .filter(({strokeColor},idx) => excalidrawElements[idx].strokeColor != strokeColor)
+        .map((el,idx) => {
+          return {...el, strokeColor: excalidrawElements[idx].strokeColor}
+        })
       const ownElements =  findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
       const otherElements =  findElements.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
       const socket = socketRef.current
+
+      console.log(`
+          ================================================================ change_strokeColor
+          findElements = ${JSON.stringify(findElements)}
+          ownElements.length = ${ownElements.length}
+          otherElements.length = ${otherElements.length}
+      `);
 
       if(Boolean(ownElements.length) && !Boolean(otherElements.length)) {
         dispatch(Redux.changeElments(ownElements as ExcalidrawElement[]))
@@ -164,7 +182,13 @@ const ExcalidrawWrapper: React.FC = () => {
             .filter(({x, y},idx) => excalidrawElementsSlice[idx].x != x || excalidrawElementsSlice[idx].y != y) || []
 
           if(!!findElements.length) {
+
             const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
+            console.log(`
+                ================================================================ moveElements
+                findElements = ${findElements[0]}
+                ownElements.length = ${ownElement.length}
+            `);
 
             if(!!ownElement.length) {
               dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))

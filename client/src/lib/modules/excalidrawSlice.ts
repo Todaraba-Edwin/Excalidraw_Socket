@@ -23,17 +23,16 @@ export const excalidrawSlice = createSlice({
       userId : string,
       data : ExcalidrawElement
     }>) => {
-      console.log('리덕스_addElements');
+      console.log('리덕스_addElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
       const streamArr = state.find(({id}) => id === data.id)    
       return !Boolean(streamArr) ? [...state, {...data, frameId:userId}] : state
   },
     changeElments: (state,{payload}:PayloadAction<ExcalidrawElement[]>) => {
-      console.log('리덕스_changeElments', payload);
+      console.log('리덕스_changeElments <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
       const changeElementsIds = payload.map(({id}) => id)
       return state.map(el => {
         if(changeElementsIds.includes(el.id)) {
           const findElement = payload.find(({id}) => id === el.id)
-          console.log('findElement', findElement);
           return {...el, 
               x: findElement? findElement.x: el.x, 
               y: findElement? findElement.y: el.y, 
@@ -43,11 +42,11 @@ export const excalidrawSlice = createSlice({
       })
     },
     removeElements: (state, {payload}:PayloadAction<string[]>) => {
-      console.log('리덕스_removeElements');
+      console.log('리덕스_removeElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
       return [...state.filter(({id}) => !payload.includes(id))]
     },
     resetElements: ( ) => {
-      console.log('리덕스_resetElements');
+      console.log('리덕스_resetElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
       return []
     }
   },
