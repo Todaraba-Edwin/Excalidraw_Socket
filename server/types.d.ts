@@ -55,12 +55,14 @@ export type ExcalidrawElement = {
   };
 
 
+// {}
 export type MESSAGE_ExcalidrawElement = {
   room :JOIN_ROOM
   message : ExcalidrawElement
   // STREAM_MESSAGE
 }
 
+// {}[]
 export type MESSAGE_ExcalidrawElement_Arr = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
@@ -75,17 +77,20 @@ export type STREAM_MOVE_MESSAGE = {
   message : ExcalidrawElement[]
 };
 
+// {}
 export type ADD_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement
 };
 
 
+// ['id', 'id','id','id']
 export type REMOVE_MESSAGE = {
   room :JOIN_ROOM
-  message : ExcalidrawElement[]
+  message : string[]
 };
 
+// {}[]
 export type MOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]

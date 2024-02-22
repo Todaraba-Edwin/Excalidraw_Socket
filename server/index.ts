@@ -21,12 +21,16 @@ io.on("connection", (socket)=>{
   socket.on("join_room", (room:Type.JOIN_ROOM)=> {
     socket.join(room)
  })
+  // socket.to(data.room).emit("initData_message", data)  // DB에 저장된 친구가 있으면 => 
 
+
+  // 개체가 추가되었을 때, 하나
   socket.on("stream_message", (data:Type.STREAM_MESSAGE)=> {
     console.log(data);
     socket.to(data.room).emit("stream_receive_message", data)
   })
 
+  // 존재하는 개체들 묶음을 이동할 때 
   socket.on("stream_move_Element", (data:Type.STREAM_MOVE_MESSAGE)=> {
     console.log(data);
     socket.to(data.room).emit("stream_move_receive_message", data)
@@ -46,7 +50,6 @@ io.on("connection", (socket)=>{
     socket.to(data.room).emit("change_strokeColor_receive_message", data)
   })
 
-
   socket.on("remove_message", (data:Type.REMOVE_MESSAGE)=> {
     console.log(data);
     socket.to(data.room).emit("remove_receive_message", data)
@@ -55,7 +58,6 @@ io.on("connection", (socket)=>{
     console.log(data);
     socket.to(data.room).emit("reset_receive_message", data)
   })
-
 })
 
 server.listen(3003, ()=>{
