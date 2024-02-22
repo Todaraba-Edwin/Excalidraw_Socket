@@ -41,10 +41,19 @@ io.on("connection", (socket)=>{
     console.log(data);
     socket.to(data.room).emit("move_receive_message", data)
   })
+  socket.on("change_strokeColor_message", (data:Type.MOVE_MESSAGE)=> {
+    console.log(data);
+    socket.to(data.room).emit("change_strokeColor_receive_message", data)
+  })
+
 
   socket.on("remove_message", (data:Type.REMOVE_MESSAGE)=> {
     console.log(data);
     socket.to(data.room).emit("remove_receive_message", data)
+  })
+  socket.on("reset_message", (data:Type.REMOVE_MESSAGE)=> {
+    console.log(data);
+    socket.to(data.room).emit("reset_receive_message", data)
   })
 
 })

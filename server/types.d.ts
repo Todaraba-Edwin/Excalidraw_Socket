@@ -54,7 +54,19 @@ export type ExcalidrawElement = {
     points: number[][];
   };
 
-  export type STREAM_MESSAGE = {
+
+export type MESSAGE_ExcalidrawElement = {
+  room :JOIN_ROOM
+  message : ExcalidrawElement
+  // STREAM_MESSAGE
+}
+
+export type MESSAGE_ExcalidrawElement_Arr = {
+  room :JOIN_ROOM
+  message : ExcalidrawElement[]
+}
+
+export type STREAM_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement
 };

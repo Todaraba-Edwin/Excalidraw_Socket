@@ -30,13 +30,6 @@ const ExcalidrawWrapper: React.FC = () => {
 
   const handleChange = (excalidrawElements:readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
     const socket = socketRef.current
-    console.log(`
-    ================================================================ handleChange
-    excalidrawElements = ${excalidrawElements[0]?.strokeColor}
-    pointerState = ${pointerState}
-    excalidrawElementsSlice.length = ${excalidrawElementsSlice.length}
-    excalidrawElements.length = ${excalidrawElements.length}
-`);
 
     // stream_add_Element
     if(pointerState ===  pointerStateEnm.DOWN && excalidrawElementsSlice.length < excalidrawElements.length) {
@@ -53,41 +46,36 @@ const ExcalidrawWrapper: React.FC = () => {
     if(!!findElements.length) {
       const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
       if(!!ownElement.length) {
-        dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
-        socket.emit("move_message", { room: ROOM_NAME, message: ownElement})
+          dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
+          socket.emit("move_message", { room: ROOM_NAME, message: ownElement})
 
-        } else {
-          if (excalidrawRef.current) {
-            const cloneElementList = cloneDeep(excalidrawElementsSlice)
-            excalidrawRef.current.updateScene({
-              elements: cloneElementList as readonly ExcalidrawElement[]
-             })
-         }
-      }
-    } 
+          } else {
+            if (excalidrawRef.current) {
+              const cloneElementList = cloneDeep(excalidrawElementsSlice)
+              excalidrawRef.current.updateScene({
+                elements: cloneElementList as readonly ExcalidrawElement[]
+              })
+          }
+        }
+      } 
     }
     
     // change_strokeColor
     if(pointerState === pointerStateEnm.UP && excalidrawElementsSlice.length === excalidrawElements.length) {
       const findElements = excalidrawElementsSlice
         .filter(({strokeColor},idx) => excalidrawElements[idx].strokeColor != strokeColor)
-        .map((el,idx) => {
-          return {...el, strokeColor: excalidrawElements[idx].strokeColor}
+        .map((el) => {
+          const findElment = excalidrawElements.find(({id}) => id === el.id)
+          return {...el, strokeColor: findElment ? findElment.strokeColor : el.strokeColor}
         })
       const ownElements =  findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
       const otherElements =  findElements.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
       const socket = socketRef.current
 
-      console.log(`
-          ================================================================ change_strokeColor
-          findElements = ${JSON.stringify(findElements)}
-          ownElements.length = ${ownElements.length}
-          otherElements.length = ${otherElements.length}
-      `);
-
+      console.log('change_strokeColor_ownElements', ownElements, Boolean(ownElements.length), !Boolean(otherElements.length)); 
       if(Boolean(ownElements.length) && !Boolean(otherElements.length)) {
         dispatch(Redux.changeElments(ownElements as ExcalidrawElement[]))
-        socket.emit("move_message", { room: ROOM_NAME, message: ownElements})
+        socket.emit("change_strokeColor_message", { room: ROOM_NAME, message: ownElements})
       }
       if(!Boolean(ownElements.length) && Boolean(otherElements.length)) {
         const cloneElementList = cloneDeep(excalidrawElementsSlice)
@@ -100,8 +88,26 @@ const ExcalidrawWrapper: React.FC = () => {
 
       if(Boolean(ownElements.length) && Boolean(otherElements.length)) {
         dispatch(Redux.changeElments(ownElements as ExcalidrawElement[]))
-        socket.emit("move_message", { room: ROOM_NAME, message: ownElements})
+        socket.emit("change_strokeColor_message", { room: ROOM_NAME, message: ownElements})
       }
+    }
+
+    // reset_elements
+    const currentExcalidrawElements = excalidrawElements.filter(({isDeleted}) => !isDeleted).length
+    if(Boolean(excalidrawElements.length) && Boolean(excalidrawElementsSlice.length)) {
+      
+      const findOthers = excalidrawElementsSlice.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
+      if(Boolean(findOthers.length)) {
+        if((excalidrawElementsSlice.length > 0 || excalidrawElements.length > 0) && !Boolean(currentExcalidrawElements)) {
+          const findOthers = excalidrawElementsSlice.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
+          socket.emit("reset_message", { room: ROOM_NAME, message: findOthers})
+          if(Boolean(findOthers.length)) {
+            setIschangeElement(true)
+          } else {
+            setIschangeElement(false)
+          }
+        }
+      }      
     }
     
     // contextmenuNull - function
@@ -120,9 +126,8 @@ const ExcalidrawWrapper: React.FC = () => {
 
   useEffect(()=>{
     socketRef.current = io(SOCKET_SERVER_URL)
-    const handleSocketMessage = (name:string, action: (payload: any) 
+    const handleSocketMessage = (action: (payload: any) 
       => any, {message}: {message : ExcalidrawElement | ExcalidrawElement[] | string[]}) => {
-      console.log(`${name}_receive_message`, message);
       dispatch(action(message));
     };
 
@@ -134,22 +139,32 @@ const ExcalidrawWrapper: React.FC = () => {
 
           // stream
           socket.on('stream_receive_message', (data:any) => {
-            handleSocketMessage('stream',Redux.streamElements, data);
+            handleSocketMessage(Redux.streamElements, data);
           })
 
           // add
           socket.on('add_receive_message', (data:any) => {
-            handleSocketMessage('add',Redux.addElements, data);
+            handleSocketMessage(Redux.addElements, data);
           })
 
-            // move
-            socket.on('move_receive_message', (data:any) => {
-              handleSocketMessage('move', Redux.changeElments, data)
-            })
+          // move
+          socket.on('move_receive_message', (data:any) => {
+            handleSocketMessage(Redux.changeElments, data)
+          })
+
+          // change_strokeColor
+          socket.on('change_strokeColor_receive_message', (data:any) => {
+            handleSocketMessage(Redux.changeElments, data)
+          })
 
           // remove
           socket.on('remove_receive_message', (data:any) => {
-            handleSocketMessage('remove',Redux.removeElements, data);
+            handleSocketMessage(Redux.removeElements, data);
+          })
+
+          // reset
+          socket.on('reset_receive_message', (data:any) => {
+            handleSocketMessage(Redux.resetElements, data);
           })
       });
     }    
@@ -184,11 +199,6 @@ const ExcalidrawWrapper: React.FC = () => {
           if(!!findElements.length) {
 
             const ownElement = findElements.filter(({frameId}) => frameId && frameId.includes(userId)) || []
-            console.log(`
-                ================================================================ moveElements
-                findElements = ${findElements[0]}
-                ownElements.length = ${ownElement.length}
-            `);
 
             if(!!ownElement.length) {
               dispatch(Redux.changeElments(ownElement as ExcalidrawElement[]))
@@ -217,6 +227,12 @@ const ExcalidrawWrapper: React.FC = () => {
         }  
 
       }
+
+      //reset 
+      if(!activeSceneElements && Boolean(excalidrawElementsSlice.length)) {
+        const findOthers = excalidrawElementsSlice.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
+        dispatch(Redux.resetElements(findOthers))
+      }
     }
     
  },[ischangeElement])
@@ -230,8 +246,6 @@ const ExcalidrawWrapper: React.FC = () => {
       })
     }
  },[excalidrawElementsSlice])
-
-
 
   return (
     <div style={{height:"calc(100dvh - 100px)"}}  >

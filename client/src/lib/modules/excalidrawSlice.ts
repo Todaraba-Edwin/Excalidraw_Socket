@@ -1,17 +1,16 @@
-import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/lib/store'
-import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
+import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
 const initialState: ExcalidrawElement[] = []
-
 export const excalidrawSlice = createSlice({
   name: 'excalidrawSlice',
   initialState,
   reducers: {
       streamElements: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
         const streamArr = state.find(({id}) => id === payload.id)
-        console.log('리덕스_streamElements', payload, Boolean(streamArr), streamArr);
+        // console.log('리덕스_streamElements');
         return !Boolean(streamArr) ? [...state, payload] : state.map(el => {
           if(el.id === payload.id) {
             return {...payload}
@@ -23,12 +22,12 @@ export const excalidrawSlice = createSlice({
       userId : string,
       data : ExcalidrawElement
     }>) => {
-      console.log('리덕스_addElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
+      // console.log('리덕스_addElements');
       const streamArr = state.find(({id}) => id === data.id)    
-      return !Boolean(streamArr) ? [...state, {...data, frameId:userId}] : state
+      return !Boolean(streamArr) ? [...state, {...data, frameId:userId}] : [...state.map((el) => streamArr && el.id === streamArr.id ? {...el, frameId:userId}: el)]
   },
     changeElments: (state,{payload}:PayloadAction<ExcalidrawElement[]>) => {
-      console.log('리덕스_changeElments <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
+      // console.log('리덕스_changeElments');
       const changeElementsIds = payload.map(({id}) => id)
       return state.map(el => {
         if(changeElementsIds.includes(el.id)) {
@@ -42,12 +41,12 @@ export const excalidrawSlice = createSlice({
       })
     },
     removeElements: (state, {payload}:PayloadAction<string[]>) => {
-      console.log('리덕스_removeElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
+      // console.log('리덕스_removeElements');
       return [...state.filter(({id}) => !payload.includes(id))]
     },
-    resetElements: ( ) => {
-      console.log('리덕스_resetElements <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< +++');
-      return []
+    resetElements: (_,{payload}:PayloadAction<ExcalidrawElement[]>) => {
+      // console.log('리덕스_resetElements');
+      return [...payload]
     }
   },
 })
