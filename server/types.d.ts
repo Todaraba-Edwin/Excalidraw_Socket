@@ -1,11 +1,11 @@
-type JOIN_ROOM = string;
-type ROUNDNESS = {
+export type JOIN_ROOM = string;
+export type ROUNDNESS = {
     LEGACY: 1,
     PROPORTIONAL_RADIUS: 2,
     ADAPTIVE_RADIUS: 3,
 };
 
-type ExcalidrawElement = {
+export type ExcalidrawElement = {
     id: string;
     x: number;
     y: number;
@@ -54,32 +54,32 @@ type ExcalidrawElement = {
     points: number[][];
   };
 
-type STREAM_MESSAGE = {
+  export type STREAM_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement
 };
-type STREAM_MOVE_MESSAGE = {
+export type STREAM_MOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
 };
 
-type ADD_MESSAGE = {
+export type ADD_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement
 };
 
 
-type REMOVE_MESSAGE = {
+export type REMOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
 };
 
-type MOVE_MESSAGE = {
+export type MOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
 };
 
-type RESET_MESSAGE = {
+export type RESET_MESSAGE = {
   room :JOIN_ROOM
   message : any
 };
