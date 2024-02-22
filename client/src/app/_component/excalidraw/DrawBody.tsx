@@ -81,7 +81,6 @@ const ExcalidrawWrapper: React.FC = () => {
       }
 
       if(Boolean(ownElements.length) && Boolean(otherElements.length)) {
-        console.log('여가 문제야... 둘다 있는 경우');
         dispatch(Redux.changeElments(ownElements as ExcalidrawElement[]))
         socket.emit("move_message", { room: ROOM_NAME, message: ownElements})
       }
@@ -156,7 +155,7 @@ const ExcalidrawWrapper: React.FC = () => {
         // addElements
         if(excalidrawElementsSliceLeng < activeSceneElementsLeng) {
           dispatch(Redux.addElements({userId, data: activeSceneElements.at(-1) as ExcalidrawElement}))
-          socket.emit("add_message", { room: ROOM_NAME, message: {userId, data: activeSceneElements.at(-1) as ExcalidrawElement}})
+          socket.emit("add_message", { room: ROOM_NAME, message: {userId, data: {...activeSceneElements.at(-1), frameId:userId} as ExcalidrawElement}})
         }
 
         // moveElements
