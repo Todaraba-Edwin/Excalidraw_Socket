@@ -8,6 +8,7 @@ import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import * as Redux from '@/lib/modules/excalidrawSlice';
 import { io } from 'socket.io-client';
 import cloneDeep from 'lodash/cloneDeep'
+
 type pointerStateType = "down" | "up"
 enum pointerStateEnm { DOWN = 'down', UP = 'up'}
 const SOCKET_SERVER_URL = 'http://localhost:3003';
@@ -21,14 +22,18 @@ const ExcalidrawWrapper: React.FC = () => {
   const dispatch = useAppDispatch();
   const socketRef = useRef<any>(null)
   const excalidrawRef = useRef<ExcalidrawImperativeAPI | null>(null)
-  
+
   const handlePointerUpdate = ({button}:{ button: pointerStateType}) => {
-    if(pointerState === pointerStateEnm.DOWN && pointerState != button) setIschangeElement(true)
-    else setIschangeElement(false)
+    if(pointerState === pointerStateEnm.DOWN && pointerState != button) {
+      !ischangeElement && setIschangeElement(true)
+    } else {
+      ischangeElement && setIschangeElement(false)
+    }
     setPointerState(button)
   } 
 
-  const handleChange = (excalidrawElements:readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
+  // == handleChange  ============================================================================================================
+  const handleChange = (excalidrawElements:readonly ExcalidrawElement[], appState: AppState) => {
     const socket = socketRef.current
 
     // stream_add_Element
@@ -72,7 +77,6 @@ const ExcalidrawWrapper: React.FC = () => {
       const otherElements =  findElements.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
       const socket = socketRef.current
 
-      console.log('change_strokeColor_ownElements', ownElements, Boolean(ownElements.length), !Boolean(otherElements.length)); 
       if(Boolean(ownElements.length) && !Boolean(otherElements.length)) {
         dispatch(Redux.changeElments(ownElements as ExcalidrawElement[]))
         socket.emit("change_strokeColor_message", { room: ROOM_NAME, message: ownElements})
@@ -95,7 +99,6 @@ const ExcalidrawWrapper: React.FC = () => {
     // reset_elements
     const currentExcalidrawElements = excalidrawElements.filter(({isDeleted}) => !isDeleted).length
     if(Boolean(excalidrawElements.length) && Boolean(excalidrawElementsSlice.length)) {
-      
       const findOthers = excalidrawElementsSlice.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
       if(Boolean(findOthers.length)) {
         if((excalidrawElementsSlice.length > 0 || excalidrawElements.length > 0) && !Boolean(currentExcalidrawElements)) {
@@ -109,7 +112,7 @@ const ExcalidrawWrapper: React.FC = () => {
         }
       }      
     }
-    
+
     // contextmenuNull - function
     if(Boolean(appState.contextMenu)) {
             if(excalidrawRef.current) {
@@ -122,8 +125,7 @@ const ExcalidrawWrapper: React.FC = () => {
     }
   }
 
-
-
+  // == useEffect_socketRef ======================================================================================================
   useEffect(()=>{
     socketRef.current = io(SOCKET_SERVER_URL)
     const handleSocketMessage = (action: (payload: any) 
@@ -174,16 +176,18 @@ const ExcalidrawWrapper: React.FC = () => {
   },[])
 
 
+  // == excalidrawElementsSlice 변경될 때 실행 : useEffect_ischangeElement , useEffect_socketRef  =================================
 
- useEffect(()=>{
-    if(ischangeElement) {
+  // useEffect_ischangeElement
+  useEffect(()=>{
+    if(ischangeElement) { // 마우스 이벤트가 종료되었을 때; onPointerUpdate에 의해 ischangeElement 가 true 가 되었을 때 
       const socket = socketRef.current
       const excalidrawAPI = excalidrawRef.current
-      const activeSceneElements = excalidrawAPI?.getSceneElements()
+      const activeSceneElements = excalidrawAPI?.getSceneElements() // 활성상태 // 삭제된 것은 제외 된 리스트 반환 
+      const activeSceneElementsLeng = activeSceneElements ? activeSceneElements.length : 0;
+      const excalidrawElementsSliceLeng = excalidrawElementsSlice.length;
 
-      if(activeSceneElements) {
-        const activeSceneElementsLeng = activeSceneElements.length;
-        const excalidrawElementsSliceLeng = excalidrawElementsSlice.length;
+      if(activeSceneElements && Boolean(activeSceneElementsLeng)) { // 활성상태 []이 실제로 존재할 때 
 
         // addElements
         if(excalidrawElementsSliceLeng < activeSceneElementsLeng) {
@@ -232,21 +236,26 @@ const ExcalidrawWrapper: React.FC = () => {
       if(!activeSceneElements && Boolean(excalidrawElementsSlice.length)) {
         const findOthers = excalidrawElementsSlice.filter(({frameId}) => frameId && !frameId.includes(userId)) || []
         dispatch(Redux.resetElements(findOthers))
+        socket.emit("reset_message", { room: ROOM_NAME, message: findOthers})
       }
     }
-    
  },[ischangeElement])
 
+
+
+ // == excalidrawElementsSlice 변경될 때 실행 : useEffect_ischangeElement , useEffect_socketRef  =================================
  useEffect(()=>{
   if(excalidrawRef.current) {
-    console.log('excalidrawElementsSlice', excalidrawElementsSlice);
-    const cloneElementList = cloneDeep(excalidrawElementsSlice)
-      excalidrawRef.current.updateScene({
-        elements: cloneElementList as readonly ExcalidrawElement[]
-      })
-    }
+    // console.log('excalidrawElementsSlice', excalidrawElementsSlice)   
+    excalidrawRef.current.history.clear(); 
+    excalidrawRef.current.updateScene({
+      elements: cloneDeep(excalidrawElementsSlice) as readonly ExcalidrawElement[]
+    })
+  }
  },[excalidrawElementsSlice])
 
+
+  // ==  return : Excalidraw 컴포넌트 ============================================================================================
   return (
     <div style={{height:"calc(100dvh - 100px)"}}  >
       <Excalidraw
