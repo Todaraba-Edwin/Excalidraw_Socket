@@ -17,12 +17,10 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket)=>{
-  
   socket.on("join_room", (room:Type.JOIN_ROOM)=> {
     socket.join(room)
  })
   // socket.to(data.room).emit("initData_message", data)  // DB에 저장된 친구가 있으면 => 
-
 
   // 개체가 추가되었을 때, 하나
   socket.on("stream_message", (data:Type.STREAM_MESSAGE)=> {
