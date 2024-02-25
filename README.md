@@ -2,8 +2,8 @@
 - ### index
     [1. client](#1-client)<br>
     [2. server](#2-server)<br>
-    [3. server](#3-socket-settings)<br>
-    [4. server](#4-excalidraw-socket)<br><br>
+    [3. Socket Settings](#3-socket-settings)<br>
+    [4. Excalidraw-Socket](#4-excalidraw-socket)<br><br>
 
     ```bash
     📂 root

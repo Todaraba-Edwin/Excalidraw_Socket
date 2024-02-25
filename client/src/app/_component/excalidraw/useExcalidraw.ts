@@ -25,11 +25,12 @@ type handle_ElsProps =  SOCKET_TYPE & {
 
 export const useExcalidraw = (getUserId:string, room_Name:string, socketAPI:SOCKETAPI_TYPE) => {
     const excalidrawRef = useRef<ExcalidrawImperativeAPI | null>(null)
-    const {totalState} = useAppSelector(Redux.selectExcalidrawElements)
+    const totalState = useAppSelector(Redux.selectExcalidrawElements)
     const [pointerState, setPointerState] = useState<pointerStateType>(pointerStateEnm.UP)
     const [ischangeElement, setIschangeElement] = useState<boolean>(false)
     const { handleExcalidrawSelectDispatch } = useExcalidrawSlice();
 
+    // ChangePointerState Toggle Handle
     const handleChangePointerState = (button: pointerStateType) => {
         if(pointerState === pointerStateEnm.DOWN && pointerState != button) {
             !ischangeElement && setIschangeElement(true)
@@ -60,6 +61,7 @@ export const useExcalidraw = (getUserId:string, room_Name:string, socketAPI:SOCK
             })
         }
     }
+    // appState.currentItemRoughness Handle
     const handleCurrentItemRoughness = (currentItemRoughness:number) => {
         if(currentItemRoughness != 0 && excalidrawRef.current) {
             excalidrawRef.current.updateScene({
@@ -69,6 +71,9 @@ export const useExcalidraw = (getUserId:string, room_Name:string, socketAPI:SOCK
             })
         }
     }
+    // ⬆️⬆️⬆️⬆️⬆️⬆️ Excalidraw Settings init  
+    // ==========================================================
+    // ⬇️⬇️⬇️⬇️⬇️⬇️ Excalidraw Elements Store & Socket.emit Settings 
 
     /*  Excalidraw.onChange.!!nonTracked user.MouseEvent 
         - streaming_element, add writing
@@ -76,60 +81,58 @@ export const useExcalidraw = (getUserId:string, room_Name:string, socketAPI:SOCK
         - chagne_strokeColor | chagne_angle
         - reset : own+other, only other, only own 
     */
+
     // socketAPI:Socket | any | null, room:string, userId:string,excalidrawElements:ExcalidrawElement | undefined
     const handleStreaming_addEl = ({socket : { socketAPI, room}, data }:handle_ElProps) => {
-        if(socketAPI) {
-            socketAPI.emit('stream_message',{ room, message: data})
-        }
-    }
-    const handle_addEl = ({socket : { socketAPI, room}, data }:handle_ElProps) => {
-        if(socketAPI) {
-            socketAPI.emit('add_message',{ room, message: data})
-        }
+        socketAPI && socketAPI.emit('stream_message',{ room, message: data})
     }
     const handleStreaming_MoveEls = ({socket : { socketAPI, room}, data }:handle_ElsProps) => {
-        if(socketAPI) {
-            socketAPI.emit('stream_move_Element',{ room, message: data})
-        }
+        socketAPI && socketAPI.emit('stream_move_Element',{ room, message: data})
     }
-    const handle_MovefEls = ({socket : { socketAPI, room}, data }:handle_ElsProps) => {
-        if(socketAPI) {
-            socketAPI.emit('move_message',{ room, message: data})
-        }
+    const handle_addEl = ({socket : { socketAPI, room}, data }:handle_ElProps) => {
+        socketAPI && socketAPI.emit('add_message',{ room, message: data})
     }
 
+    /*  Store.totalState.!!nonTracked user.MouseEvent 
+        - streaming_element, add writing
+        - streaming_elements, moving Elements
+        - chagne_strokeColor | chagne_angle
+        - reset : own+other, only other, only own 
+    */    
+
+    // const handle_MovefEls = ({socket : { socketAPI, room}, data }:handle_ElsProps) => {
+    //     socketAPI && socketAPI.emit('move_message',{ room, message: data})
+    // }
+
+    // Tracked user.MouseEvent - setStore && Socket_emit 
     useEffect(()=>{
         if(ischangeElement && excalidrawRef.current) {
             const excalidrawAPI = excalidrawRef.current;
             const activeEls = excalidrawAPI.getSceneElements();
             const activeElsLeng = activeEls.length || 0
             const StoreElsLeng = totalState.length || 0;
-            const totalEls = excalidrawAPI.getSceneElementsIncludingDeleted();
+            // const totalEls = excalidrawAPI.getSceneElementsIncludingDeleted();
 
             /*  TODO : handleChangePointerState, EndTime user.MouseEvent
                 - add : own -> socket
                 - move : own -> socket
                 - remove
             */
-
+            if(!Boolean(activeElsLeng)) {
+                /// 
+                return 
+            }
+              
             // activeElsLeng.true && store < activeEls 큰 경우, isAdd Element
-            if(Boolean(activeElsLeng) && StoreElsLeng < activeElsLeng) {
+            if(StoreElsLeng < activeElsLeng) {
                 const insertFramIdEl = cloneDeep({...activeEls.at(-1),  frameId:getUserId}) as ExcalidrawElement
                 handleExcalidrawSelectDispatch(Redux.setAddEl, {message:insertFramIdEl})
                 handle_addEl({socket : {socketAPI, room : room_Name}, data:insertFramIdEl})
             }
             // activeElsLeng.true && store === activeEls, versionUp, isMove Element
-            if(Boolean(activeElsLeng) && StoreElsLeng === activeElsLeng) {
-                // console.log('movedState', movedState);
-                
-                // const movedStateLeng = Boolean(movedState.length || 0)
-                // if(movedStateLeng) {
-                //     handle_MovefEls({socket : {socketAPI, room : room_Name}, data:movedState})
-                // }
+            if(StoreElsLeng === activeElsLeng) {
+              
             }
-
-
-           
         }
     },[ischangeElement])
 

@@ -30,6 +30,7 @@ export const useSocket = ({room_Name}: {
     useEffect(()=>{
         socketRef.current = io(SOCKET_SERVER_URL) 
 
+        // only_Socket Receive //
         if(socketRef.current) {
             const socket = socketRef.current
             socket.on("connect", () => {

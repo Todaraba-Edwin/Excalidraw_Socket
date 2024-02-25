@@ -7,23 +7,20 @@ import './drawbody.css'
 import { useSocket } from './useSocket';
 import { pointerStateEnm, useExcalidraw } from './useExcalidraw';
 // Redux
-import { useAppDispatch, useAppSelector } from '@/lib/hooks';
-import { selectExcalidrawElements, setMovedOwnEls, setStreamMove_Els } from '@/lib/modules/excalidrawSlice';
+import { useAppSelector } from '@/lib/hooks';
+import { selectExcalidrawElements } from '@/lib/modules/excalidrawSlice';
 // lib
 import { Excalidraw } from "@excalidraw/excalidraw";
 import * as ExcalidrawTypes from '@excalidraw/excalidraw/types/types';
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import cloneDeep from 'lodash/cloneDeep'
-import { useExcalidrawSlice } from './useExcalidrawSlice';
 
 
 const ExcalidrawWrapper: React.FC = () => {
   const room_Name = 'roomName'
   const getUserId = useSearchParams().get('userId') || ''
-  const {totalState} = useAppSelector(selectExcalidrawElements)
-  const { handleExcalidrawSelectDispatch } = useExcalidrawSlice()
+  const totalState = useAppSelector(selectExcalidrawElements)
   const StoreElsLeng = totalState.length || 0;
-  const dispatch = useAppDispatch()
 
   const {socketAPI} = useSocket({room_Name})
   const {
@@ -33,7 +30,6 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoundness,
     handleCurrentItemRoughness,
     handleStreaming_addEl,
-    handleStreaming_MoveEls
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
   // TODO : Assign onExcalidrawAPI
@@ -82,19 +78,14 @@ const ExcalidrawWrapper: React.FC = () => {
         const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length)
+         
         if(isFindOwsEls) {
-          handleStreaming_MoveEls({
-            socket : {
-              socketAPI,
-              room: room_Name, 
-            },
-            data : findOwsEls 
-          })
+        // TODO 01 - 나의 것만 소켓을 통해서 상대방에서 전달, 
+
         }
         if(isfindOtherEls) {
-          const originOther = totalState.filter(({frameId}) => frameId != getUserId)
-          const undoOriginOther = originOther.filter(({x,y}, idx) => x != findOtherEls[idx].x || y != findOtherEls[idx].y)
-          handleExcalidrawSelectDispatch(setStreamMove_Els, {message : [...findOwsEls, ...undoOriginOther]})
+        // TODO 02 - 남의 것은 원래대로 원상 복구 해야 하지 않을까? 남의 것은 원상복구
+          
         }
       }
     }
@@ -121,3 +112,31 @@ const ExcalidrawWrapper: React.FC = () => {
   );
 };
 export default ExcalidrawWrapper;
+
+
+/*
+      // 2 streaming_elements, moving Elements : own -> others
+      if(StoreElsLeng === activeElsLeng) {
+        const moveEls = activeEls.filter(({x,y},idx) => totalState[idx].x != x || totalState[idx].y != y)
+        const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
+        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        const isfindOtherEls = Boolean(findOtherEls.length)
+        // 내것과 남의 것을 구분지어야 하는데, 내것은 이동하고 소켓으로 보내고 
+        // 남의 것은 원래대로 원상 복구 해야 하지 않을까? 
+        if(isFindOwsEls) {
+          handleStreaming_MoveEls({
+            socket : {
+              socketAPI,
+              room: room_Name, 
+            },
+            data : findOwsEls 
+          })
+        }
+        if(isfindOtherEls) {
+          const originOther = totalState.filter(({frameId}) => frameId != getUserId)
+          const undoOriginOther = originOther.filter(({x,y}, idx) => x != findOtherEls[idx].x || y != findOtherEls[idx].y)
+          handleExcalidrawSelectDispatch(setStreamMove_Els, {message : [...findOwsEls, ...undoOriginOther]})
+        }
+      }
+*/

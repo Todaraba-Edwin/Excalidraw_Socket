@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import excalidrawSlice from './modules/excalidrawSlice'
+import excalidrawMovedSlice from './modules/excalidrawMovedSlice'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      excalidrawSlice
+      excalidrawSlice,
+      excalidrawMovedSlice
     }
   })
 }
