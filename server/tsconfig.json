@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6", // 또는 "es5"
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*index.ts" // 소스 코드 디렉토리에 맞게 조절하세요
+  ],
+  "exclude": ["node_modules"]
+}
