@@ -30,73 +30,64 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoundness,
     handleCurrentItemRoughness,
     handleStreaming_addEl,
+    handleStreaming_MoveEls,
+    handleStreaming_MoveOtherReset,
+    handleChange_StrokeColorEls,
+    handle_Remove
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
-  // TODO : Assign onExcalidrawAPI
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
-  // TODO : Tracking user.MouseEvent, UP | DOWN
   const onPointerUpdate = ({button}:{ button: pointerStateType}) => handleChangePointerState(button)
-
-  // TODO : Tracking Excalidraw all Events
   const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
     const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
     const activeElsLeng = activeEls.length || 0
-    
-    /*  !!init Settings
-        - ContextMenu alaways null
-        - Roundness alaways sharp, default round
-    */
 
     handleHideContextMenu(Boolean(appState.contextMenu))
     handleCurrentItemRoundness(appState.currentItemRoundness)
     handleCurrentItemRoughness(appState.currentItemRoughness)
 
-    /*  !!nonTracked user.MouseEvent  
-        - 1 streaming_element, add writing : own -> others
-        - 2 streaming_elements, moving Elements : own -> others
-        - 3 chagne_strokeColor | chagne_angle
-        - 4 reset : own+other, only other, only own 
-    */
-
     if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
-      // 1 streaming_element, add writing : own -> others
       if(StoreElsLeng < activeElsLeng) {
         const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
-        handleStreaming_addEl({
-          socket : {
-            socketAPI,
-            room: room_Name, 
-          },
-          data : streaming_element 
-        })
+        handleStreaming_addEl({data : streaming_element})
       }
 
-      // 2 streaming_elements, moving Elements : own -> others
       if(StoreElsLeng === activeElsLeng) {
-        const moveEls = activeEls.filter(({x,y},idx) => totalState[idx].x != x || totalState[idx].y != y)
+        const moveEls = activeEls.filter(({x,y, angle},idx) => 
+          totalState[idx].x != x || 
+          totalState[idx].y != y || 
+          totalState[idx].angle != angle 
+        )
         const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
-        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId)
+        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId).map(({id}) => id)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length)
          
         if(isFindOwsEls) {
-        // TODO 01 - 나의 것만 소켓을 통해서 상대방에서 전달, 
-
+        handleStreaming_MoveEls({data : findOwsEls })
         }
         if(isfindOtherEls) {
-        // TODO 02 - 남의 것은 원래대로 원상 복구 해야 하지 않을까? 남의 것은 원상복구
-          
+          const originOtherEls = totalState.filter(({id}) => findOtherEls.includes(id))   
+          handleStreaming_MoveOtherReset(originOtherEls)
         }
       }
     }
 
-    // 3 chagne_strokeColor | chagne_angle
     if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {
-    
+      if(StoreElsLeng === activeElsLeng) {
+        const changeColorEls = activeEls.filter(({strokeColor},idx) => totalState[idx].strokeColor != strokeColor)
+        const findOwsEls = changeColorEls.filter(({frameId}) => frameId === getUserId)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        if(isFindOwsEls) {
+          handleChange_StrokeColorEls({data : findOwsEls}) 
+        }
+      }
+    }
+
+    if(appState.cursorButton === pointerStateEnm.UP && !Boolean(activeElsLeng)) {
+      handle_Remove(activeEls as ExcalidrawElement[])()
     }
   }
-
- 
 
   return (
     <div style={{height:"calc(100dvh - 100px)"}}  >
@@ -112,31 +103,3 @@ const ExcalidrawWrapper: React.FC = () => {
   );
 };
 export default ExcalidrawWrapper;
-
-
-/*
-      // 2 streaming_elements, moving Elements : own -> others
-      if(StoreElsLeng === activeElsLeng) {
-        const moveEls = activeEls.filter(({x,y},idx) => totalState[idx].x != x || totalState[idx].y != y)
-        const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
-        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId)
-        const isFindOwsEls = Boolean(findOwsEls.length)
-        const isfindOtherEls = Boolean(findOtherEls.length)
-        // 내것과 남의 것을 구분지어야 하는데, 내것은 이동하고 소켓으로 보내고 
-        // 남의 것은 원래대로 원상 복구 해야 하지 않을까? 
-        if(isFindOwsEls) {
-          handleStreaming_MoveEls({
-            socket : {
-              socketAPI,
-              room: room_Name, 
-            },
-            data : findOwsEls 
-          })
-        }
-        if(isfindOtherEls) {
-          const originOther = totalState.filter(({frameId}) => frameId != getUserId)
-          const undoOriginOther = originOther.filter(({x,y}, idx) => x != findOtherEls[idx].x || y != findOtherEls[idx].y)
-          handleExcalidrawSelectDispatch(setStreamMove_Els, {message : [...findOwsEls, ...undoOriginOther]})
-        }
-      }
-*/
