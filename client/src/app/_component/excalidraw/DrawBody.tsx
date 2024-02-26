@@ -30,14 +30,47 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoundness,
     handleCurrentItemRoughness,
     handleStreaming_addEl,
-    handleStreaming_MoveEls,
-    handleStreaming_MoveOtherReset,
-    handleChange_StrokeColorEls,
-    handle_Remove
+    // handleStreaming_MoveEls,
+    // handleStreaming_MoveOtherReset,
+    // handleChange_StrokeColorEls,
+    // handle_Remove
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
   const onPointerUpdate = ({button}:{ button: pointerStateType}) => handleChangePointerState(button)
+  const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
+    const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
+    const activeElsLeng = activeEls.length || 0
+
+    handleHideContextMenu(Boolean(appState.contextMenu))
+    handleCurrentItemRoundness(appState.currentItemRoundness)
+    handleCurrentItemRoughness(appState.currentItemRoughness)
+
+    if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
+      if(StoreElsLeng < activeElsLeng) {
+        const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
+        handleStreaming_addEl({data : streaming_element})
+      }
+    }
+
+  }
+
+  return (
+    <div style={{height:"calc(100dvh - 100px)"}}  >
+      <Excalidraw
+        langCode='ko-KR' 
+        initialData={null}
+        gridModeEnabled={true} 
+        onChange={onChange}
+        excalidrawAPI={onExcalidrawAPI}
+        onPointerUpdate={onPointerUpdate}
+        />
+    </div> 
+  );
+};
+export default ExcalidrawWrapper;
+
+/*
   const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
     const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
     const activeElsLeng = activeEls.length || 0
@@ -88,18 +121,4 @@ const ExcalidrawWrapper: React.FC = () => {
       handle_Remove(activeEls as ExcalidrawElement[])()
     }
   }
-
-  return (
-    <div style={{height:"calc(100dvh - 100px)"}}  >
-      <Excalidraw
-        langCode='ko-KR' 
-        initialData={null}
-        gridModeEnabled={true} 
-        onChange={onChange}
-        excalidrawAPI={onExcalidrawAPI}
-        onPointerUpdate={onPointerUpdate}
-        />
-    </div> 
-  );
-};
-export default ExcalidrawWrapper;
+*/

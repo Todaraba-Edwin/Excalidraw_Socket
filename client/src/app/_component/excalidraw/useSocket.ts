@@ -30,31 +30,32 @@ export const useSocket = ({room_Name}: {
             socket.on("connect", () => {
               socket.emit("join_room", room_Name);
 
-                socket.on('stream_receive_message', (data:MESSAGE_ElProps) => {                  
+                socket.on('stream_receive_message', (data:MESSAGE_ElProps) => {   
+                  console.log(data);
                   handleExcalidrawSelectDispatch(Redux.setStreamEl, data);
                 })
       
-                socket.on('add_receive_message', (data:MESSAGE_ElProps) => {
-                  handleExcalidrawSelectDispatch(Redux.setAddOtherEl, data);
-                })
+                // socket.on('add_receive_message', (data:MESSAGE_ElProps) => {
+                //   handleExcalidrawSelectDispatch(Redux.setAddOtherEl, data);
+                // })
       
-                socket.on('stream_move_receive_message', (data:MESSAGE_ElsProps) => {
+                // socket.on('stream_move_receive_message', (data:MESSAGE_ElsProps) => {
                   
-                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data)
-                })
+                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data)
+                // })
 
-                socket.on('move_receive_message', (data:MESSAGE_ElProps) => {
-                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
-                })
+                // socket.on('move_receive_message', (data:MESSAGE_ElProps) => {
+                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
+                // })
 
-                socket.on('change_strokeColor_receive_message', (data:MESSAGE_ElProps) => {
-                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
-                })
+                // socket.on('change_strokeColor_receive_message', (data:MESSAGE_ElProps) => {
+                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
+                // })
       
-                socket.on('remove_receive_message', (data:MESSAGE_ElProps) => {
-                  console.log('remove_receive_message', data);
-                  handleExcalidrawSelectDispatch(Redux.setRemove_Els, data);
-                })
+                // socket.on('remove_receive_message', (data:MESSAGE_ElProps) => {
+                //   console.log('remove_receive_message', data);
+                //   handleExcalidrawSelectDispatch(Redux.setRemove_Els, data);
+                // })
             });
           }    
           return () => {
