@@ -91,6 +91,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     }
     const handle_MoveEls = ({data}:handle_ElsProps) => {  
         socketAPI && socketAPI.emit('move_message',{ room, message: data})
+        dispatch(ExcalidrawMoveSlice.setMovedEls([]))
     }
     const on_remove = ({data}:handleRemove_ElsProps) => {  
         socketAPI && socketAPI.emit('remove_message',{ room, message: data})
@@ -131,7 +132,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
 
             if(StoreElsLeng === activeElsLeng) {
                 const moveOwnEls = totalStore.filter(({id}) => moveIdsStore.includes(id))
-                handle_MoveEls({data:moveOwnEls})
+                const moveOwnElsLeng = Boolean(moveOwnEls.length)
+                moveOwnElsLeng && handle_MoveEls({data:moveOwnEls})
             }
 
             if(StoreElsLeng > activeElsLeng) {
@@ -140,14 +142,21 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         }
     },[ischangeElement])
 
+    
     useEffect(()=>{
-        console.log('excalidrawSlice', totalStore);
+     
         if(excalidrawRef.current) {
+            const clone = cloneDeep(totalStore) as readonly ExcalidrawElement[]
+          
             excalidrawRef.current.history.clear()
             excalidrawRef.current.updateScene({
-                elements: cloneDeep(totalStore) as readonly ExcalidrawElement[]
+                elements: clone
               })
         }
+    },[totalStore.length])
+
+    useEffect(()=>{
+        console.log('total',totalStore)
     },[totalStore])
 
     return {
