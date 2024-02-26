@@ -8,7 +8,6 @@ import MessageModel from "./models/addMessage";
 const app = express();
 const server = http.createServer(app);
 const mongoose = require("mongoose");
-// const MessageModel = require("./models/addMessage");
 
 const io = new Server(server, {
   cors: {
@@ -33,40 +32,13 @@ io.on("connection", (socket) => {
     socket.join(room);
   });
 
-  // socket.to(data.room).emit("initData_message", data)  // DB에 저장된 친구가 있으면 =>
-
-  //사용자가 페이지를 새로 고침하거나 다시 방문했을 때 이전의 그림을 다시 불러옴
-  socket.on(
-    "initData_message",
-    async (data: Type.MESSAGE_ExcalidrawElement_Arr) => {
-      try {
-        // roomId에 해당하는 모든 그림을 찾음
-        const messages = await MessageModel.find({ room: data.room })
-          .sort({ _id: -1 })
-          .exec();
-
-        if (messages.length > 0) {
-          // 그림 데이터를 클라이언트에게 전송
-          socket.to(data.room).emit(
-            "linitData_message",
-            messages.map((data) => data)
-          );
-        } else {
-          console.log("No messages found for roomId:", data.room);
-        }
-      } catch (error) {
-        console.error("Error loading messages:", (error as Error).message);
-      }
-    }
-  );
-
   socket.on("stream_message", (data: Type.STREAM_MESSAGE) => {
     console.log(data);
     socket.to(data.room).emit("stream_receive_message", data);
   });
 
   socket.on("stream_move_Element", (data: Type.STREAM_MOVE_MESSAGE) => {
-    // console.log(data);
+    console.log("stream_move_Element", data);
     socket.to(data.room).emit("stream_move_receive_message", data);
   });
 
@@ -83,14 +55,14 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("add_receive_message", data);
   });
 
-  // 존재하는 개체들 묶음을 이동할 때 // ??? 마우스 클릭기준이 아닌둣
+  // 존재하는 개체들 묶음을 이동할 때 // ??? 마우스 클릭기준이 아닌듯 하다!
   socket.on("move_message", async (data: Type.MOVE_MESSAGE) => {
     try {
       for (const element of data.message) {
         // ExcalidrawElement의 id를 사용하여 해당 메시지를 찾아 업데이트
         await MessageModel.updateOne(
-          { id: element.id },
-          { $set: element } // ExcalidrawElement의 모든 필드를 업데이트
+          { "message.data.id": element.id },
+          { $set: { "message.data": element } }
         );
       }
       console.log("Messages updated successfully:", data.message);
@@ -103,9 +75,29 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("move_receive_message", data);
   });
 
-  socket.on("change_strokeColor_message", (data: Type.MOVE_MESSAGE) => {
-    // console.log(data);
-    socket.to(data.room).emit("change_strokeColor_receive_message", data);
+  //개체 색상 변경
+
+  socket.on("change_strokeColor_message", async (data: Type.MOVE_MESSAGE) => {
+    console.log("change_strokeColor_message", data);
+
+    try {
+      for (const element of data.message) {
+        const result = await MessageModel.updateOne(
+          { "message.data.id": element.id },
+          { $set: { "message.data.strokeColor": element.strokeColor } }
+        );
+        console.log(
+          `Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`
+        );
+        console.log(
+          `ExcalidrawElement with id ${element.id} - strokeColor updated successfully.`
+        );
+      }
+      // 변경된 결과를 클라이언트에게 다시 전달
+      socket.to(data.room).emit("change_strokeColor_receive_message", data);
+    } catch (error) {
+      console.error("Error updating ExcalidrawElements:", error);
+    }
   });
 
   //개체 하나 혹은 여러개 삭제할때
@@ -128,8 +120,9 @@ io.on("connection", (socket) => {
     }
   });
 
+  //캔버스 초기화
   socket.on("reset_message", (data: Type.REMOVE_MESSAGE) => {
-    // console.log(data);
+    console.log("reset_message", data);
     socket.to(data.room).emit("reset_receive_message", data);
   });
 });
