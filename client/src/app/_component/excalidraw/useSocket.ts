@@ -35,22 +35,23 @@ export const useSocket = ({room_Name}: {
                   handleExcalidrawSelectDispatch(Redux.setStreamEl, data);
                 })
       
-                // socket.on('add_receive_message', (data:MESSAGE_ElProps) => {
-                //   handleExcalidrawSelectDispatch(Redux.setAddOtherEl, data);
-                // })
+                socket.on('add_receive_message', (data:MESSAGE_ElProps) => {
+                  handleExcalidrawSelectDispatch(Redux.setAddOtherEl, data);
+                })
       
-                // socket.on('stream_move_receive_message', (data:MESSAGE_ElsProps) => {
-                  
-                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data)
-                // })
+                socket.on('stream_move_receive_message', (data:MESSAGE_ElsProps) => {
+                  console.log('stream_move_receive_message');
+                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data)
+                })
 
-                // socket.on('move_receive_message', (data:MESSAGE_ElProps) => {
-                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
-                // })
+                socket.on('move_receive_message', (data:MESSAGE_ElProps) => {
+                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
+                })
 
-                // socket.on('change_strokeColor_receive_message', (data:MESSAGE_ElProps) => {
-                //   handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
-                // })
+                socket.on('change_strokeColor_receive_message', (data:MESSAGE_ElProps) => {
+                  console.log('change_strokeColor_receive_message');
+                  handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
+                })
       
                 // socket.on('remove_receive_message', (data:MESSAGE_ElProps) => {
                 //   console.log('remove_receive_message', data);

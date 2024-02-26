@@ -30,9 +30,9 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoundness,
     handleCurrentItemRoughness,
     handleStreaming_addEl,
-    // handleStreaming_MoveEls,
-    // handleStreaming_MoveOtherReset,
-    // handleChange_StrokeColorEls,
+    handleStreaming_MoveEls,
+    handleStreaming_MoveOtherReset,
+    handleChange_StrokeColorEls,
     // handle_Remove
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
@@ -53,6 +53,50 @@ const ExcalidrawWrapper: React.FC = () => {
       }
     }
 
+    if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
+      if(StoreElsLeng < activeElsLeng) {
+        const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
+        handleStreaming_addEl({data : streaming_element})
+      }
+
+      if(StoreElsLeng === activeElsLeng) {
+        const moveEls = activeEls.filter(({x,y, angle, height, width},idx) => 
+          totalState[idx].x != x || 
+          totalState[idx].y != y || 
+          totalState[idx].angle != angle ||
+          totalState[idx].height != height ||
+          totalState[idx].width != width
+        )
+        const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
+        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId).map(({id}) => id)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        const isfindOtherEls = Boolean(findOtherEls.length)
+         
+        if(isFindOwsEls) {
+          console.log('isFindOwsEls');
+          handleStreaming_MoveEls({data : findOwsEls })
+        }
+        if(isfindOtherEls) {
+          const originOtherEls = totalState.filter(({id}) => findOtherEls.includes(id))  
+          console.log('originOtherEls', originOtherEls);
+          handleStreaming_MoveOtherReset(originOtherEls)
+        }
+      }
+    }
+
+    if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {      
+      if(StoreElsLeng === activeElsLeng) {
+        const upDateEls = activeEls.map((el, idx) => {
+          return {...el, frameId: totalState[idx].frameId}
+        })
+        const changeColorEls = upDateEls.filter(({strokeColor},idx) => totalState[idx].strokeColor != strokeColor)
+        const findOwsEls = changeColorEls.filter(({frameId}) => frameId === getUserId)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        if(isFindOwsEls) {
+          handleChange_StrokeColorEls({data : findOwsEls}) 
+        }
+      }
+    }
   }
 
   return (

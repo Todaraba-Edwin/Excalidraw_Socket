@@ -72,48 +72,55 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     const handleStreaming_addEl = ({data}:handle_ElProps) => {
         socketAPI && socketAPI.emit('stream_message',{ room, message: data})
     }
-    // const handleStreaming_MoveEls = ({data}:handle_ElsProps) => {
-    //     socketAPI && socketAPI.emit('stream_move_Element', { room, message: data})
-    //     const findIds = data.map(({id}) => id)
-    //     dispatch(ExcalidrawMoveSlice.setMovedEls(findIds))
-    //     dispatch(ExcalidrawSlice.setChange_Els(data))
-    // }
-    // const handleChange_StrokeColorEls = ({data}:handle_ElsProps) => {
-    //     socketAPI && socketAPI.emit('change_strokeColor_message',{ room, message: data})
-    //     dispatch(ExcalidrawSlice.setChange_Els(data))
-    // }
-    // const handleStreaming_MoveOtherReset = (originOtherEls:ExcalidrawElement[]) => {
-    //     dispatch(ExcalidrawSlice.setChange_Els(originOtherEls))
-    // }
+    const handleStreaming_MoveEls = ({data}:handle_ElsProps) => {
+        socketAPI && socketAPI.emit('stream_move_Element', { room, message: data})
+        const findIds = data.map(({id}) => id)
+        dispatch(ExcalidrawMoveSlice.setMovedEls(findIds))
+        console.log('handleStreaming_MoveEls');
+        dispatch(ExcalidrawSlice.setChange_Els(data))
+    }
+    const handleChange_StrokeColorEls = ({data}:handle_ElsProps) => {
+        socketAPI && socketAPI.emit('change_strokeColor_message',{ room, message: data})
+        console.log('handleChange_StrokeColorEls');
+        dispatch(ExcalidrawSlice.setChange_Els(data))
+    }
+    const handleStreaming_MoveOtherReset = (originOtherEls:ExcalidrawElement[]) => {
+        console.log('handleStreaming_MoveOtherReset');
+        dispatch(ExcalidrawSlice.setChange_Els(originOtherEls))
+    }
 
-    // const handle_addEl = ({data}:handle_ElProps) => {
-    //     socketAPI && socketAPI.emit('add_message',{ room, message: data})
-    // }
-    // const handle_MoveEls = ({data}:handle_ElsProps) => {  
-    //     socketAPI && socketAPI.emit('move_message',{ room, message: data})
-    //     dispatch(ExcalidrawMoveSlice.setMovedEls([]))
-    // }
-    // const on_remove = ({data}:handleRemove_ElsProps) => {  
-    //     socketAPI && socketAPI.emit('remove_message',{ room, message: data})
-    //     dispatch(ExcalidrawSlice.setRemove_Els(data))
-    // }
-    // const on_recoverOther = ({data}:handle_ElsProps) => {  
-    //     dispatch(ExcalidrawSlice.setRecoverOther_Els(data))
-    // }
+    const handle_addEl = ({data}:handle_ElProps) => {
+        socketAPI && socketAPI.emit('add_message',{ room, message: data})
+    }
+    const handle_MoveEls = ({data}:handle_ElsProps) => {  
+        socketAPI && socketAPI.emit('move_message',{ room, message: data})
+        dispatch(ExcalidrawMoveSlice.setMovedEls([]))
+    }
+    const on_remove = ({data}:handleRemove_ElsProps) => {  
+        socketAPI && socketAPI.emit('remove_message',{ room, message: data})
+        dispatch(ExcalidrawSlice.setRemove_Els(data))
+    }
+    const on_recoverOther = ({data}:handle_ElsProps) => {  
+        dispatch(ExcalidrawSlice.setRecoverOther_Els(data))
+    }
 
-    // const handle_Remove = (activeEls:ExcalidrawElement[]) => () => {
-    //     const deletedEls = totalStore.filter(({id:totalId}) => !activeEls.some(({id:activeId}) => totalId === activeId))
-    //     const findOwsEls = deletedEls.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
-    //     const findOtherEls = deletedEls.filter(({frameId}) => frameId != getUserId)
-    //     const isFindOwsEls = Boolean(findOwsEls.length)
-    //     const isfindOtherEls = Boolean(findOtherEls.length)  
-    //     if(isFindOwsEls) {
-    //         on_remove({data : findOwsEls})
-    //     }
-    //     if(isfindOtherEls) {
-    //         on_recoverOther({data:findOtherEls})
-    //     }
-    // }
+    const handle_Remove = (activeEls:ExcalidrawElement[]) => () => {
+        const deletedEls = totalStore.filter(({id:totalId}) => !activeEls.some(({id:activeId}) => totalId === activeId))
+        const findOwsEls = deletedEls.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
+        const findOtherEls = deletedEls.filter(({frameId}) => frameId != getUserId)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        const isfindOtherEls = Boolean(findOtherEls.length) 
+        console.log('deletedEls', deletedEls);
+        console.log('findOwsEls', deletedEls);
+        console.log('findOtherEls', deletedEls);
+         
+        if(isFindOwsEls) {
+            on_remove({data : findOwsEls})
+        }
+        if(isfindOtherEls) {
+            on_recoverOther({data:findOtherEls})
+        }
+    }
 
     useEffect(()=>{
         if(ischangeElement && excalidrawRef.current) {
@@ -121,24 +128,20 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
             const activeEls = excalidrawAPI.getSceneElements();
             const activeElsLeng = activeEls.length || 0
             const StoreElsLeng = totalStore.length || 0;
-
-            // if(!Boolean(activeElsLeng)) return
               
-            // if(StoreElsLeng < activeElsLeng) {
-            //     const insertFramIdEl = cloneDeep({...activeEls.at(-1),  frameId:getUserId}) as ExcalidrawElement
-            //     handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
-            //     handle_addEl({data:insertFramIdEl})
-            // }
+          if(Boolean(activeElsLeng)) {
+            if(StoreElsLeng < activeElsLeng) {
+                const insertFramIdEl = cloneDeep({...activeEls.at(-1),  frameId:getUserId}) as ExcalidrawElement
+                handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
+                handle_addEl({data:insertFramIdEl})
+            }
 
-            // if(StoreElsLeng === activeElsLeng) {
-            //     const moveOwnEls = totalStore.filter(({id}) => moveIdsStore.includes(id))
-            //     const moveOwnElsLeng = Boolean(moveOwnEls.length)
-            //     moveOwnElsLeng && handle_MoveEls({data:moveOwnEls})
-            // }
-
-            // if(StoreElsLeng > activeElsLeng) {
-            //     handle_Remove(activeEls as ExcalidrawElement[])
-            // }
+            if(StoreElsLeng === activeElsLeng) {
+                const moveOwnEls = totalStore.filter(({id}) => moveIdsStore.includes(id))
+                const moveOwnElsLeng = Boolean(moveOwnEls.length)
+                moveOwnElsLeng && handle_MoveEls({data:moveOwnEls})
+            }
+          }
         }
     },[ischangeElement])
 
@@ -162,9 +165,9 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         handleCurrentItemRoughness,
         // onChange_socketAPI
         handleStreaming_addEl,
-        // handleStreaming_MoveEls,
-        // handleStreaming_MoveOtherReset,
-        // handleChange_StrokeColorEls,
+        handleStreaming_MoveEls,
+        handleStreaming_MoveOtherReset,
+        handleChange_StrokeColorEls,
         // handle_Remove
     }
 }
