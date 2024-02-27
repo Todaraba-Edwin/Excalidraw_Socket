@@ -3,18 +3,20 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
+export type ExcalidrawCustomDTO = ExcalidrawElement & {
+  writerId : string | null
+}
 
-const initialState: ExcalidrawElement[] | [] = [];
+const initialState: ExcalidrawCustomDTO[] | [] = [];
 
 export const excalidrawSlice = createSlice({
   name: 'excalidrawSlice',
   initialState,
   reducers: {
     // other -> store
-    setStreamEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
-      console.log('리덕스_setStreamEl',  JSON.parse(JSON.stringify(state)));
-      
-      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
+    setStreamEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
+      console.log('리덕스_setStreamEl');
+      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawCustomDTO
       return Boolean(streamArr) ? state.map(el => {
         if(el.id === streamArr.id) {
           return payload
@@ -22,14 +24,14 @@ export const excalidrawSlice = createSlice({
       }) : [...state, payload]
     }, 
     // own -> store
-    setAddEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+    setAddEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
       console.log('리덕스_setAddEl')
       return [...state, payload]
     },
     // other -> store
-    setAddOtherEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+    setAddOtherEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
       console.log('리덕스_setAddOtherEl');
-      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
+      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawCustomDTO
       return state.map(el => {
         if(el.id === streamArr.id) {
           return payload
@@ -37,17 +39,17 @@ export const excalidrawSlice = createSlice({
       })
       },
     // other || own -> store 
-    setChange_Els: (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
+    setChange_Els: (state, {payload}: PayloadAction<ExcalidrawCustomDTO[]>) => {
       console.log('리덕스_setStreamEls');
       const findIds = payload.map(({id}) => id)
       return state.map(el => {
         if(findIds.includes(el.id)) {
-          const findEl = payload.find(({id}) => id === el.id) as ExcalidrawElement
+          const findEl = payload.find(({id}) => id === el.id) as ExcalidrawCustomDTO
           return {...findEl}
         } return el
       })
     },  
-
+    // remove && reset
     // other -> store 
      setRemove_Els: (state, {payload}: PayloadAction<string[]>) => {
       console.log('리덕스_setRemove_Els');
@@ -58,8 +60,7 @@ export const excalidrawSlice = createSlice({
     setRecoverOther_Els : (state) => {
       console.log('리덕스_setRecoverOther_Els');
       return [...state]
-    }
-      
+    },
   },
 })
 
@@ -69,7 +70,7 @@ export const {
     setAddEl,
     setChange_Els,
     setRecoverOther_Els,
-    setRemove_Els
-  } = excalidrawSlice.actions // setAddOtherEl, setAddEl, setChange_Els, setRemove_Els, setRecoverOther_Els
+    setRemove_Els,
+  } = excalidrawSlice.actions 
 export const selectExcalidrawElements = (state: RootState) => state.excalidrawSlice
 export default excalidrawSlice.reducer
