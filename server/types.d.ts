@@ -95,8 +95,3 @@ export type MOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
 };
-
-export type RESET_MESSAGE = {
-  room :JOIN_ROOM
-  message : any
-};

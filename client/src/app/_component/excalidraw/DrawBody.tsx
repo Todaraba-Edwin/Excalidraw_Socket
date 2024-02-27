@@ -19,8 +19,8 @@ import cloneDeep from 'lodash/cloneDeep'
 const ExcalidrawWrapper: React.FC = () => {
   const room_Name = 'roomName'
   const getUserId = useSearchParams().get('userId') || ''
-  const totalState = useAppSelector(selectExcalidrawElements)
-  const StoreElsLeng = totalState.length || 0;
+  const totalStore = useAppSelector(selectExcalidrawElements)
+  const StoreElsLeng = totalStore.length || 0;
 
   const {socketAPI} = useSocket({room_Name})
   const {
@@ -31,9 +31,9 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoughness,
     handleStreaming_addEl,
     handleStreaming_MoveEls,
-    handleStreaming_MoveOtherReset,
+    handle_OtherReset,
     handleChange_StrokeColorEls,
-    // handle_Remove
+    handle_Reset
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
@@ -47,18 +47,20 @@ const ExcalidrawWrapper: React.FC = () => {
     handleCurrentItemRoughness(appState.currentItemRoughness)
 
     if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
+      // 01 streaming_Add
       if(StoreElsLeng < activeElsLeng) {
         const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
         handleStreaming_addEl({data : streaming_element})
       }
 
+      // 02 streaming_Move
       if(StoreElsLeng === activeElsLeng) {        
         const moveEls = activeEls.filter(({x,y, angle, height, width},idx) => 
-          totalState[idx].x != x || 
-          totalState[idx].y != y || 
-          totalState[idx].angle != angle ||
-          totalState[idx].height != height ||
-          totalState[idx].width != width
+          totalStore[idx].x != x || 
+          totalStore[idx].y != y || 
+          totalStore[idx].angle != angle ||
+          totalStore[idx].height != height ||
+          totalStore[idx].width != width
         )
 
         const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
@@ -67,30 +69,33 @@ const ExcalidrawWrapper: React.FC = () => {
         const isfindOtherEls = Boolean(findOtherEls.length)
          
         if(isFindOwsEls) {
-          console.log('isFindOwsEls');
           handleStreaming_MoveEls({data : findOwsEls })
         }
         if(isfindOtherEls) {
-          const originOtherEls = totalState.filter(({id}) => findOtherEls.includes(id))  
-          console.log('originOtherEls', originOtherEls);
-          handleStreaming_MoveOtherReset(originOtherEls)
+          const originOtherEls = totalStore.filter(({id}) => findOtherEls.includes(id))  
+          handle_OtherReset(originOtherEls)
         }
       }
     }
 
+    // 03 remove
     if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {      
       if(StoreElsLeng === activeElsLeng) {
         const upDateEls = activeEls.map((el, idx) => {
-          return {...el, frameId: totalState[idx].frameId}
+          return {...el, frameId: totalStore[idx].frameId}
         })
-        const changeColorEls = upDateEls.filter(({strokeColor},idx) => totalState[idx].strokeColor != strokeColor)
+        const changeColorEls = upDateEls.filter(({strokeColor},idx) => totalStore[idx].strokeColor != strokeColor)
         const findOwsEls = changeColorEls.filter(({frameId}) => frameId === getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         if(isFindOwsEls) {
           handleChange_StrokeColorEls({data : findOwsEls}) 
         }
-
       }
+    }
+
+    // 04 reset
+    if(appState.cursorButton === pointerStateEnm.UP && !Boolean(activeElsLeng) && Boolean(StoreElsLeng)) {
+      handle_Reset()
     }
   }
 
@@ -108,56 +113,3 @@ const ExcalidrawWrapper: React.FC = () => {
   );
 };
 export default ExcalidrawWrapper;
-
-/*
-  const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
-    const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
-    const activeElsLeng = activeEls.length || 0
-
-    handleHideContextMenu(Boolean(appState.contextMenu))
-    handleCurrentItemRoundness(appState.currentItemRoundness)
-    handleCurrentItemRoughness(appState.currentItemRoughness)
-
-    if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
-      if(StoreElsLeng < activeElsLeng) {
-        const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
-        handleStreaming_addEl({data : streaming_element})
-      }
-
-      if(StoreElsLeng === activeElsLeng) {
-        const moveEls = activeEls.filter(({x,y, angle},idx) => 
-          totalState[idx].x != x || 
-          totalState[idx].y != y || 
-          totalState[idx].angle != angle 
-        )
-        const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
-        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId).map(({id}) => id)
-        const isFindOwsEls = Boolean(findOwsEls.length)
-        const isfindOtherEls = Boolean(findOtherEls.length)
-         
-        if(isFindOwsEls) {
-        handleStreaming_MoveEls({data : findOwsEls })
-        }
-        if(isfindOtherEls) {
-          const originOtherEls = totalState.filter(({id}) => findOtherEls.includes(id))   
-          handleStreaming_MoveOtherReset(originOtherEls)
-        }
-      }
-    }
-
-    if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {
-      if(StoreElsLeng === activeElsLeng) {
-        const changeColorEls = activeEls.filter(({strokeColor},idx) => totalState[idx].strokeColor != strokeColor)
-        const findOwsEls = changeColorEls.filter(({frameId}) => frameId === getUserId)
-        const isFindOwsEls = Boolean(findOwsEls.length)
-        if(isFindOwsEls) {
-          handleChange_StrokeColorEls({data : findOwsEls}) 
-        }
-      }
-    }
-
-    if(appState.cursorButton === pointerStateEnm.UP && !Boolean(activeElsLeng)) {
-      handle_Remove(activeEls as ExcalidrawElement[])()
-    }
-  }
-*/

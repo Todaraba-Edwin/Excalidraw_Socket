@@ -12,8 +12,7 @@ export const excalidrawSlice = createSlice({
   reducers: {
     // other -> store
     setStreamEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
-      console.log('리덕스_setStreamEl',  JSON.parse(JSON.stringify(state)));
-      
+      console.log('리덕스_setStreamEl');
       const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
       return Boolean(streamArr) ? state.map(el => {
         if(el.id === streamArr.id) {
@@ -47,7 +46,7 @@ export const excalidrawSlice = createSlice({
         } return el
       })
     },  
-
+    // remove && reset
     // other -> store 
      setRemove_Els: (state, {payload}: PayloadAction<string[]>) => {
       console.log('리덕스_setRemove_Els');
@@ -58,8 +57,7 @@ export const excalidrawSlice = createSlice({
     setRecoverOther_Els : (state) => {
       console.log('리덕스_setRecoverOther_Els');
       return [...state]
-    }
-      
+    },
   },
 })
 
@@ -69,7 +67,7 @@ export const {
     setAddEl,
     setChange_Els,
     setRecoverOther_Els,
-    setRemove_Els
-  } = excalidrawSlice.actions // setAddOtherEl, setAddEl, setChange_Els, setRemove_Els, setRecoverOther_Els
+    setRemove_Els,
+  } = excalidrawSlice.actions 
 export const selectExcalidrawElements = (state: RootState) => state.excalidrawSlice
 export default excalidrawSlice.reducer

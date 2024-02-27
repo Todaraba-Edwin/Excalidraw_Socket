@@ -52,16 +52,6 @@ io.on("connection", (socket)=>{
     console.log(data);
     socket.to(data.room).emit("remove_receive_message", data)
   })
-  socket.on("reset_message", (data:Type.REMOVE_MESSAGE)=> {
-    console.log(data);
-    socket.to(data.room).emit("reset_receive_message", data)
-  })
-
-
-  socket.on("test_message", ()=> {
-    console.log('test_message');
-    // socket.to(data.room).emit("add_receive_message", data)
-  })
 })
 
 server.listen(3003, ()=>{

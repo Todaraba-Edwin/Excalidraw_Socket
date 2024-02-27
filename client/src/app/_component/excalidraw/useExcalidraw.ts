@@ -1,8 +1,8 @@
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io";
 import cloneDeep from 'lodash/cloneDeep'
+import { useEffect, useRef, useState } from "react";
 import { useExcalidrawSlice } from "./useExcalidrawSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import * as ExcalidrawSlice from "@/lib/modules/excalidrawSlice";
 import * as ExcalidrawMoveSlice from "@/lib/modules/excalidrawMovedSlice";
 import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
@@ -84,7 +84,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         console.log('handleChange_StrokeColorEls');
         dispatch(ExcalidrawSlice.setChange_Els(data))
     }
-    const handleStreaming_MoveOtherReset = (originOtherEls:ExcalidrawElement[]) => {
+    const handle_OtherReset = (originOtherEls:ExcalidrawElement[]) => {
         console.log('handleStreaming_MoveOtherReset');
         dispatch(ExcalidrawSlice.setChange_Els(originOtherEls))
     }
@@ -111,16 +111,25 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         const findOtherEls = deletedEls.filter(({frameId}) => frameId != getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length) 
-        console.log('handle_Remove', activeEls);
-        console.log('deletedEls', deletedEls);
-        console.log('findOwsEls', findOwsEls);
-        console.log('findOtherEls', findOtherEls);
          
         if(isFindOwsEls) {
             on_remove({data : findOwsEls})
         }
         if(!isFindOwsEls && isfindOtherEls) {
-            console.log('동작해야지');
+            on_recoverOther()
+        }
+    }
+
+    const handle_Reset = () => {
+        const findOwsEls = totalStore.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
+        const findOtherEls = totalStore.filter(({frameId}) => frameId != getUserId)
+        const isFindOwsEls = Boolean(findOwsEls.length)
+        const isfindOtherEls = Boolean(findOtherEls.length)
+
+        if(isFindOwsEls) {
+            on_remove({data : findOwsEls})
+        }
+        if(!isFindOwsEls && isfindOtherEls) {
             on_recoverOther()
         }
     }
@@ -133,12 +142,14 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
             const StoreElsLeng = totalStore.length || 0;
               
           if(Boolean(activeElsLeng)) {
+            // 01 Add
             if(StoreElsLeng < activeElsLeng) {
                 const insertFramIdEl = cloneDeep({...activeEls.at(-1),  frameId:getUserId}) as ExcalidrawElement
                 handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
                 handle_addEl({data:insertFramIdEl})
             }
-
+            
+            // 02 Move
             if(StoreElsLeng === activeElsLeng) {
                 const moveOwnEls = totalStore.filter(({id}) => moveIdsStore.includes(id))
                 const moveOtherEls = totalStore.filter(({id}) => !moveIdsStore.includes(id))
@@ -147,18 +158,17 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
                 moveOtherEls && on_recoverOther()
             }
           }
+
+          // 03 remove
           if(Boolean(StoreElsLeng) && StoreElsLeng > activeElsLeng) {
             handle_Remove(activeEls as ExcalidrawElement[])
           }
-
         }
     },[ischangeElement])
 
     
     useEffect(()=>{
         if(excalidrawRef.current) {
-            console.log('getSceneElements', excalidrawRef.current.getSceneElements().filter(({isDeleted}) => !isDeleted));
-            console.log('totalStore', totalStore);
             const clone = cloneDeep(totalStore) as readonly ExcalidrawElement[]
             excalidrawRef.current.history.clear()
             excalidrawRef.current.updateScene({
@@ -176,8 +186,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         // onChange_socketAPI
         handleStreaming_addEl,
         handleStreaming_MoveEls,
-        handleStreaming_MoveOtherReset,
+        handle_OtherReset,
         handleChange_StrokeColorEls,
-        // handle_Remove
+        handle_Reset
     }
 }
