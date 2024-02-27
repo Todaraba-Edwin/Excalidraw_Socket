@@ -3,10 +3,7 @@
 .layer-ui__wrapper__top-right,
 .layer-ui__wrapper__footer-right,
 label[title="라이브러리"],
-.HintViewer  {
-  display: none !important;
-}
-
+.HintViewer,
 /* .excalidraw .Stack Stack_vertical App-menu_top__left */
 button[aria-label="열기"],
 button[aria-label="다른 이름으로 저장..."],
@@ -15,7 +12,8 @@ button[aria-label="다크 모드"],
 button[aria-label="다크 모드"] + div,
 button[aria-label="캔버스 초기화"]+div,
 .dropdown-menu-group,
-.dropdown-menu-group+div {
+.dropdown-menu-group+div,
+.undo-redo-buttons.zen-mode-transition {
   display: none !important;
 }
 
@@ -26,8 +24,6 @@ button[aria-label="캔버스 초기화"]+div,
     display: none !important;
   }
 }
-
-/* .HintViewer  */
 
 /* .excalidraw .panelColumn*/
 .Island.App-menu__left {
@@ -54,10 +50,10 @@ button[aria-label="캔버스 초기화"]+div,
   }
 }
 
-
 .App-toolbar-content {
   .ToolIcon_type_button.ToolIcon_size_medium.ToolIcon_type_button--show.ToolIcon[aria-label="삭제"],
   .ToolIcon_type_button.ToolIcon_size_medium.ToolIcon_type_button--show.ToolIcon[aria-label="복제"] {
     display: none !important;
   }
 }
+

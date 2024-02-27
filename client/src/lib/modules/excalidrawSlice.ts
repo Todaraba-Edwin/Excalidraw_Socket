@@ -12,14 +12,20 @@ export const excalidrawSlice = createSlice({
   reducers: {
     // other -> store
     setStreamEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+      console.log('리덕스_setStreamEl',  JSON.parse(JSON.stringify(state)));
+      
       const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
-      console.log('리덕스_setStreamEl');
       return Boolean(streamArr) ? state.map(el => {
         if(el.id === streamArr.id) {
           return payload
         } return el
       }) : [...state, payload]
     }, 
+    // own -> store
+    setAddEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+      console.log('리덕스_setAddEl')
+      return [...state, payload]
+    },
     // other -> store
     setAddOtherEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
       console.log('리덕스_setAddOtherEl');
@@ -29,14 +35,9 @@ export const excalidrawSlice = createSlice({
           return payload
         } return el
       })
-    }, 
-    // own -> store
-    setAddEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
-      console.log('리덕스_setAddEl')
-      return [...state, payload]
-    },
-    // other -> store
-    setStreamMove_Els: (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
+      },
+    // other || own -> store 
+    setChange_Els: (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
       console.log('리덕스_setStreamEls');
       const findIds = payload.map(({id}) => id)
       return state.map(el => {
@@ -45,75 +46,30 @@ export const excalidrawSlice = createSlice({
           return {...findEl}
         } return el
       })
-    }, 
+    },  
+
+    // other -> store 
+     setRemove_Els: (state, {payload}: PayloadAction<string[]>) => {
+      console.log('리덕스_setRemove_Els');
+      const activeEls = [...state.filter(({id}) => !payload.includes(id))]
+      return activeEls
+    },
+    // Recover other -> store 
+    setRecoverOther_Els : (state) => {
+      console.log('리덕스_setRecoverOther_Els');
+      return [...state]
+    }
+      
   },
 })
 
-export const { setStreamEl, setAddOtherEl, setAddEl, setStreamMove_Els } = excalidrawSlice.actions
+export const { 
+    setStreamEl, 
+    setAddOtherEl, 
+    setAddEl,
+    setChange_Els,
+    setRecoverOther_Els,
+    setRemove_Els
+  } = excalidrawSlice.actions // setAddOtherEl, setAddEl, setChange_Els, setRemove_Els, setRecoverOther_Els
 export const selectExcalidrawElements = (state: RootState) => state.excalidrawSlice
 export default excalidrawSlice.reducer
-
-
-  //   changeElments: (state,{payload}:PayloadAction<ExcalidrawElement[]>) => {
-  //     // console.log('리덕스_changeElments');
-  //     const changeElementsIds = payload.map(({id}) => id)
-  //     return state.map(el => {
-  //       if(changeElementsIds.includes(el.id)) {
-  //         const findElement = payload.find(({id}) => id === el.id)
-  //         return {...el, 
-  //             x: findElement? findElement.x: el.x, 
-  //             y: findElement? findElement.y: el.y, 
-  //             strokeColor: findElement? findElement.strokeColor: el.strokeColor
-  //           }
-  //       } return el        
-  //     })
-  //   },
-  //   removeElements: (state, {payload}:PayloadAction<string[]>) => {
-  //     // console.log('리덕스_removeElements');
-  //     return [...state.filter(({id}) => !payload.includes(id))]
-  //   },
-  //   resetElements: (_,{payload}:PayloadAction<ExcalidrawElement[]>) => {
-  //     // console.log('리덕스_resetElements');
-  //     return [...payload]
-  //   }
-
-/*
-import type { RootState } from '@/lib/store';
-import { createSlice, CaseReducer, PayloadAction } from '@reduxjs/toolkit';
-import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
-
-interface ExcalidrawSliceState extends Array<ExcalidrawElement> {}
-
-const initialState: ExcalidrawSliceState = [];
-
-interface SetElementActionPayload {
-  payload: ExcalidrawElement;
-}
-
-type SetElementCaseReducer = CaseReducer<ExcalidrawSliceState, PayloadAction<SetElementActionPayload>>;
-
-const setElements: SetElementCaseReducer = (state, { payload }) => {
-  const streamArr: ExcalidrawElement | undefined = state.find(({ id }) => id === payload.id);
-  console.log('리덕스_streamElements');
-
-  return state
-};
-
-export const excalidrawSlice = createSlice({
-  name: 'excalidrawSlice',
-  initialState,
-  reducers: {
-    setElement:setElements,
-    setStreamEl: setElements,
-    setAddOtherEl: setElements,
-    setAddEl: (state, { payload }: PayloadAction<ExcalidrawElement>) => {
-      console.log('리덕스_streamElements');
-      return [...state, payload];
-    },
-  },
-});
-
-export const { setElement, setStreamEl, setAddEl } = excalidrawSlice.actions;
-export const selectExcalidrawElements = (state: RootState) => state.excalidrawSlice as ExcalidrawSliceState;
-export default excalidrawSlice.reducer;
-*/
