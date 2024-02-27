@@ -7,6 +7,7 @@ import * as ExcalidrawSlice from "@/lib/modules/excalidrawSlice";
 import * as ExcalidrawMoveSlice from "@/lib/modules/excalidrawMovedSlice";
 import { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types/types";
 import { ExcalidrawElement, StrokeRoundness } from "@excalidraw/excalidraw/types/element/types";
+import { setPointer } from "@/lib/modules/excalidrawPointersSlice";
 
 export enum pointerStateEnm { DOWN = 'down', UP = 'up'}
 enum StrokeRoundnessEnum { ROUND ="round", SHARP = "sharp"}
@@ -25,12 +26,22 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     const excalidrawRef = useRef<ExcalidrawImperativeAPI | null>(null)
     const totalStore = useAppSelector(ExcalidrawSlice.selectExcalidrawElements)
     const moveIdsStore = useAppSelector(ExcalidrawMoveSlice.selectExcalidrawMovedEls)
-    const [pointerState, setPointerState] = useState<pointerStateType>(pointerStateEnm.UP)
+    const [pointerState, setPointerState] = useState<pointerButtonType>(pointerStateEnm.UP)
     const [ischangeElement, setIschangeElement] = useState<boolean>(false)
     const { handleExcalidrawSelectDispatch } = useExcalidrawSlice();
     const dispatch = useAppDispatch()
 
-    const handleChangePointerState = (button: pointerStateType) => {
+    const handleStreaming_pointer = (pointer:pointerPointerType) => {
+        const streamPointer = {
+            x:pointer.x,
+            y:pointer.y,
+            writerId:getUserId
+        }
+        socketAPI && socketAPI.emit('stream_pointer',{ room, message: streamPointer})
+        dispatch(setPointer(streamPointer))
+    }
+
+    const handleChangePointerState = (button: pointerButtonType) => {
         if(pointerState === pointerStateEnm.DOWN && pointerState != button) {
             !ischangeElement && setIschangeElement(true)
         } else {
@@ -183,6 +194,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         handleHideContextMenu,
         handleCurrentItemRoundness,
         handleCurrentItemRoughness,
+        // onPointerUpdate_socketAPI
+        handleStreaming_pointer,
         // onChange_socketAPI
         handleStreaming_addEl,
         handleStreaming_MoveEls,

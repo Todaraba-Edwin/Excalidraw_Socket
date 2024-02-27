@@ -1,5 +1,5 @@
 "use client";
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation';
 // style
 import './drawbody.css'
@@ -15,7 +15,6 @@ import * as ExcalidrawTypes from '@excalidraw/excalidraw/types/types';
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import cloneDeep from 'lodash/cloneDeep'
 
-
 const ExcalidrawWrapper: React.FC = () => {
   const room_Name = 'roomName'
   const getUserId = useSearchParams().get('userId') || ''
@@ -29,6 +28,7 @@ const ExcalidrawWrapper: React.FC = () => {
     handleHideContextMenu,
     handleCurrentItemRoundness,
     handleCurrentItemRoughness,
+    handleStreaming_pointer,
     handleStreaming_addEl,
     handleStreaming_MoveEls,
     handle_OtherReset,
@@ -37,8 +37,13 @@ const ExcalidrawWrapper: React.FC = () => {
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
-  const onPointerUpdate = ({button}:{ button: pointerStateType}) => handleChangePointerState(button)
+  const onPointerUpdate = ({pointer, button}:{ pointer:pointerPointerType,button: pointerButtonType}) => {
+    handleChangePointerState(button)
+    handleStreaming_pointer(pointer)
+    
+  }
   const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
+    
     const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
     const activeElsLeng = activeEls.length || 0
 
@@ -99,8 +104,8 @@ const ExcalidrawWrapper: React.FC = () => {
     }
   }
 
+
   return (
-    <div style={{height:"calc(100dvh - 100px)"}}  >
       <Excalidraw
         langCode='ko-KR' 
         initialData={null}
@@ -109,7 +114,22 @@ const ExcalidrawWrapper: React.FC = () => {
         excalidrawAPI={onExcalidrawAPI}
         onPointerUpdate={onPointerUpdate}
         />
-    </div> 
   );
 };
 export default ExcalidrawWrapper;
+
+/*
+
+          {Boolean(totalPointers.length) && totalPointers
+          .map(({writerId, x, y, color}) => (
+            <div key={writerId} style={{
+              position:'absolute', 
+              width:'100px', 
+              height:'50px', 
+              background:`${color}`, 
+              top:`${y}px`, 
+              left:`${x}px`, 
+              zIndex:999999
+            }}>{writerId}</div>
+          ))}
+*/

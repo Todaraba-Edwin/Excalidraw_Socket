@@ -52,7 +52,14 @@ io.on("connection", (socket)=>{
     console.log(data);
     socket.to(data.room).emit("remove_receive_message", data)
   })
+
+  socket.on("stream_pointer", (data:Type.STREAM_MESSAGE)=> {
+    console.log(data);
+    socket.to(data.room).emit("stream_pointer_receive_message", data)
+  })
 })
+
+
 
 server.listen(3003, ()=>{
   console.log("Server is Running");

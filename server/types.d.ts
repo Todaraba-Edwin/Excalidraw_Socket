@@ -95,3 +95,13 @@ export type MOVE_MESSAGE = {
   room :JOIN_ROOM
   message : ExcalidrawElement[]
 };
+
+// {}[]
+export type STREAM_POINTER = {
+  room :JOIN_ROOM
+  message : {
+    x:number,
+    y:number,
+    writerId : string
+  }
+};
