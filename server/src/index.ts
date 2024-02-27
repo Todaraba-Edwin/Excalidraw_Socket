@@ -37,6 +37,7 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("stream_receive_message", data);
   });
 
+  // 존재하는 개체들 묶음을 이동할 때
   socket.on("stream_move_Element", (data: Type.STREAM_MOVE_MESSAGE) => {
     console.log("stream_move_Element", data);
     socket.to(data.room).emit("stream_move_receive_message", data);
@@ -55,20 +56,19 @@ io.on("connection", (socket) => {
     socket.to(data.room).emit("add_receive_message", data);
   });
 
-  // 존재하는 개체들 묶음을 이동할 때 // ??? 마우스 클릭기준이 아닌듯 하다!
+  // 마우스클릭기준 저장
   socket.on("move_message", async (data: Type.MOVE_MESSAGE) => {
+    console.log("move_message", data);
     try {
       for (const element of data.message) {
-        // ExcalidrawElement의 id를 사용하여 해당 메시지를 찾아 업데이트
         await MessageModel.updateOne(
           { "message.data.id": element.id },
           { $set: { "message.data": element } }
         );
       }
-      console.log("Messages updated successfully:", data.message);
     } catch (error) {
       console.error(
-        "Error updating update_message data:",
+        "Error updating move_message data:",
         (error as Error).message
       );
     }
@@ -76,7 +76,6 @@ io.on("connection", (socket) => {
   });
 
   //개체 색상 변경
-
   socket.on("change_strokeColor_message", async (data: Type.MOVE_MESSAGE) => {
     console.log("change_strokeColor_message", data);
 
@@ -118,12 +117,6 @@ io.on("connection", (socket) => {
     } catch (error) {
       console.error("Error deleting messages:", (error as Error).message);
     }
-  });
-
-  //캔버스 초기화
-  socket.on("reset_message", (data: Type.REMOVE_MESSAGE) => {
-    console.log("reset_message", data);
-    socket.to(data.room).emit("reset_receive_message", data);
   });
 });
 
