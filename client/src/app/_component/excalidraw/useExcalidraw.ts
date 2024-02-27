@@ -95,30 +95,33 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     const handle_MoveEls = ({data}:handle_ElsProps) => {  
         socketAPI && socketAPI.emit('move_message',{ room, message: data})
         dispatch(ExcalidrawMoveSlice.setMovedEls([]))
+        dispatch(ExcalidrawSlice.setChange_Els(data))
     }
     const on_remove = ({data}:handleRemove_ElsProps) => {  
         socketAPI && socketAPI.emit('remove_message',{ room, message: data})
         dispatch(ExcalidrawSlice.setRemove_Els(data))
     }
-    const on_recoverOther = ({data}:handle_ElsProps) => {  
-        dispatch(ExcalidrawSlice.setRecoverOther_Els(data))
+    const on_recoverOther = () => {  
+        dispatch(ExcalidrawSlice.setRecoverOther_Els())
     }
 
-    const handle_Remove = (activeEls:ExcalidrawElement[]) => () => {
+    const handle_Remove = (activeEls:ExcalidrawElement[]) => {
         const deletedEls = totalStore.filter(({id:totalId}) => !activeEls.some(({id:activeId}) => totalId === activeId))
         const findOwsEls = deletedEls.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
         const findOtherEls = deletedEls.filter(({frameId}) => frameId != getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length) 
+        console.log('handle_Remove', activeEls);
         console.log('deletedEls', deletedEls);
-        console.log('findOwsEls', deletedEls);
-        console.log('findOtherEls', deletedEls);
+        console.log('findOwsEls', findOwsEls);
+        console.log('findOtherEls', findOtherEls);
          
         if(isFindOwsEls) {
             on_remove({data : findOwsEls})
         }
-        if(isfindOtherEls) {
-            on_recoverOther({data:findOtherEls})
+        if(!isFindOwsEls && isfindOtherEls) {
+            console.log('동작해야지');
+            on_recoverOther()
         }
     }
 
@@ -138,16 +141,23 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
 
             if(StoreElsLeng === activeElsLeng) {
                 const moveOwnEls = totalStore.filter(({id}) => moveIdsStore.includes(id))
+                const moveOtherEls = totalStore.filter(({id}) => !moveIdsStore.includes(id))
                 const moveOwnElsLeng = Boolean(moveOwnEls.length)
                 moveOwnElsLeng && handle_MoveEls({data:moveOwnEls})
+                moveOtherEls && on_recoverOther()
             }
           }
+          if(Boolean(StoreElsLeng) && StoreElsLeng > activeElsLeng) {
+            handle_Remove(activeEls as ExcalidrawElement[])
+          }
+
         }
     },[ischangeElement])
 
     
     useEffect(()=>{
         if(excalidrawRef.current) {
+            console.log('getSceneElements', excalidrawRef.current.getSceneElements().filter(({isDeleted}) => !isDeleted));
             console.log('totalStore', totalStore);
             const clone = cloneDeep(totalStore) as readonly ExcalidrawElement[]
             excalidrawRef.current.history.clear()

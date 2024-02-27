@@ -53,10 +53,10 @@ export const useSocket = ({room_Name}: {
                   handleExcalidrawSelectDispatch(Redux.setChange_Els, data);
                 })
       
-                // socket.on('remove_receive_message', (data:MESSAGE_ElProps) => {
-                //   console.log('remove_receive_message', data);
-                //   handleExcalidrawSelectDispatch(Redux.setRemove_Els, data);
-                // })
+                socket.on('remove_receive_message', (data:MESSAGE_ElProps) => {
+                  console.log('remove_receive_message', data);
+                  handleExcalidrawSelectDispatch(Redux.setRemove_Els, data);
+                })
             });
           }    
           return () => {

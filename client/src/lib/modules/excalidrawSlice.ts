@@ -35,7 +35,7 @@ export const excalidrawSlice = createSlice({
           return payload
         } return el
       })
-    }, 
+      },
     // other || own -> store 
     setChange_Els: (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
       console.log('리덕스_setStreamEls');
@@ -48,13 +48,16 @@ export const excalidrawSlice = createSlice({
       })
     },  
 
-    //  // other -> store 
+    // other -> store 
      setRemove_Els: (state, {payload}: PayloadAction<string[]>) => {
+      console.log('리덕스_setRemove_Els');
       const activeEls = [...state.filter(({id}) => !payload.includes(id))]
       return activeEls
     },
-    setRecoverOther_Els : (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
-      return [...state, ...payload ]
+    // Recover other -> store 
+    setRecoverOther_Els : (state) => {
+      console.log('리덕스_setRecoverOther_Els');
+      return [...state]
     }
       
   },

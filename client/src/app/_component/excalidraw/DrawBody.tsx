@@ -51,15 +51,8 @@ const ExcalidrawWrapper: React.FC = () => {
         const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
         handleStreaming_addEl({data : streaming_element})
       }
-    }
 
-    if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
-      if(StoreElsLeng < activeElsLeng) {
-        const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
-        handleStreaming_addEl({data : streaming_element})
-      }
-
-      if(StoreElsLeng === activeElsLeng) {
+      if(StoreElsLeng === activeElsLeng) {        
         const moveEls = activeEls.filter(({x,y, angle, height, width},idx) => 
           totalState[idx].x != x || 
           totalState[idx].y != y || 
@@ -67,6 +60,7 @@ const ExcalidrawWrapper: React.FC = () => {
           totalState[idx].height != height ||
           totalState[idx].width != width
         )
+
         const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
         const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId).map(({id}) => id)
         const isFindOwsEls = Boolean(findOwsEls.length)
@@ -95,6 +89,7 @@ const ExcalidrawWrapper: React.FC = () => {
         if(isFindOwsEls) {
           handleChange_StrokeColorEls({data : findOwsEls}) 
         }
+
       }
     }
   }
