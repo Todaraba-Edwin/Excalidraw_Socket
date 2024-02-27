@@ -3,17 +3,20 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
+export type ExcalidrawCustomDTO = ExcalidrawElement & {
+  writerId : string | null
+}
 
-const initialState: ExcalidrawElement[] | [] = [];
+const initialState: ExcalidrawCustomDTO[] | [] = [];
 
 export const excalidrawSlice = createSlice({
   name: 'excalidrawSlice',
   initialState,
   reducers: {
     // other -> store
-    setStreamEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+    setStreamEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
       console.log('리덕스_setStreamEl');
-      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
+      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawCustomDTO
       return Boolean(streamArr) ? state.map(el => {
         if(el.id === streamArr.id) {
           return payload
@@ -21,14 +24,14 @@ export const excalidrawSlice = createSlice({
       }) : [...state, payload]
     }, 
     // own -> store
-    setAddEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+    setAddEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
       console.log('리덕스_setAddEl')
       return [...state, payload]
     },
     // other -> store
-    setAddOtherEl: (state, {payload}: PayloadAction<ExcalidrawElement>) => {
+    setAddOtherEl: (state, {payload}: PayloadAction<ExcalidrawCustomDTO>) => {
       console.log('리덕스_setAddOtherEl');
-      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawElement
+      const streamArr:ExcalidrawElement = state.find(({id}) => id === payload.id) as ExcalidrawCustomDTO
       return state.map(el => {
         if(el.id === streamArr.id) {
           return payload
@@ -36,12 +39,12 @@ export const excalidrawSlice = createSlice({
       })
       },
     // other || own -> store 
-    setChange_Els: (state, {payload}: PayloadAction<ExcalidrawElement[]>) => {
+    setChange_Els: (state, {payload}: PayloadAction<ExcalidrawCustomDTO[]>) => {
       console.log('리덕스_setStreamEls');
       const findIds = payload.map(({id}) => id)
       return state.map(el => {
         if(findIds.includes(el.id)) {
-          const findEl = payload.find(({id}) => id === el.id) as ExcalidrawElement
+          const findEl = payload.find(({id}) => id === el.id) as ExcalidrawCustomDTO
           return {...findEl}
         } return el
       })

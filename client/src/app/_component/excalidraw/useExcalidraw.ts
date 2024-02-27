@@ -12,10 +12,10 @@ export enum pointerStateEnm { DOWN = 'down', UP = 'up'}
 enum StrokeRoundnessEnum { ROUND ="round", SHARP = "sharp"}
 type SOCKETAPI_TYPE = Socket | any | null
 type handle_ElProps = {
-    data : ExcalidrawElement
+    data : ExcalidrawSlice.ExcalidrawCustomDTO
 }
 type handle_ElsProps = {
-    data : ExcalidrawElement[]
+    data : ExcalidrawSlice.ExcalidrawCustomDTO[]
 }
 type handleRemove_ElsProps = {
     data : string[]
@@ -84,7 +84,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
         console.log('handleChange_StrokeColorEls');
         dispatch(ExcalidrawSlice.setChange_Els(data))
     }
-    const handle_OtherReset = (originOtherEls:ExcalidrawElement[]) => {
+    const handle_OtherReset = (originOtherEls:ExcalidrawSlice.ExcalidrawCustomDTO[]) => {
         console.log('handleStreaming_MoveOtherReset');
         dispatch(ExcalidrawSlice.setChange_Els(originOtherEls))
     }
@@ -107,8 +107,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
 
     const handle_Remove = (activeEls:ExcalidrawElement[]) => {
         const deletedEls = totalStore.filter(({id:totalId}) => !activeEls.some(({id:activeId}) => totalId === activeId))
-        const findOwsEls = deletedEls.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
-        const findOtherEls = deletedEls.filter(({frameId}) => frameId != getUserId)
+        const findOwsEls = deletedEls.filter(({writerId}) => writerId === getUserId).map(({id}) => id)
+        const findOtherEls = deletedEls.filter(({writerId}) => writerId != getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length) 
          
@@ -121,8 +121,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     }
 
     const handle_Reset = () => {
-        const findOwsEls = totalStore.filter(({frameId}) => frameId === getUserId).map(({id}) => id)
-        const findOtherEls = totalStore.filter(({frameId}) => frameId != getUserId)
+        const findOwsEls = totalStore.filter(({writerId}) => writerId === getUserId).map(({id}) => id)
+        const findOtherEls = totalStore.filter(({writerId}) => writerId != getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length)
 
@@ -144,7 +144,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
           if(Boolean(activeElsLeng)) {
             // 01 Add
             if(StoreElsLeng < activeElsLeng) {
-                const insertFramIdEl = cloneDeep({...activeEls.at(-1),  frameId:getUserId}) as ExcalidrawElement
+                const insertFramIdEl = cloneDeep({...activeEls.at(-1),  writerId:getUserId}) as ExcalidrawSlice.ExcalidrawCustomDTO
                 handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
                 handle_addEl({data:insertFramIdEl})
             }
@@ -161,7 +161,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
 
           // 03 remove
           if(Boolean(StoreElsLeng) && StoreElsLeng > activeElsLeng) {
-            handle_Remove(activeEls as ExcalidrawElement[])
+            handle_Remove(activeEls as ExcalidrawSlice.ExcalidrawCustomDTO[])
           }
         }
     },[ischangeElement])

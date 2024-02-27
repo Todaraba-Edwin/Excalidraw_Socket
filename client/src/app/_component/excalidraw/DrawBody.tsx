@@ -8,7 +8,7 @@ import { useSocket } from './useSocket';
 import { pointerStateEnm, useExcalidraw } from './useExcalidraw';
 // Redux
 import { useAppSelector } from '@/lib/hooks';
-import { selectExcalidrawElements } from '@/lib/modules/excalidrawSlice';
+import { ExcalidrawCustomDTO, selectExcalidrawElements } from '@/lib/modules/excalidrawSlice';
 // lib
 import { Excalidraw } from "@excalidraw/excalidraw";
 import * as ExcalidrawTypes from '@excalidraw/excalidraw/types/types';
@@ -49,7 +49,7 @@ const ExcalidrawWrapper: React.FC = () => {
     if(appState.cursorButton === pointerStateEnm.DOWN && Boolean(activeElsLeng)) {
       // 01 streaming_Add
       if(StoreElsLeng < activeElsLeng) {
-        const streaming_element = cloneDeep({...excalidrawElements.at(-1), frameId:getUserId}) as ExcalidrawElement
+        const streaming_element = cloneDeep({...excalidrawElements.at(-1), writerId:getUserId}) as ExcalidrawCustomDTO
         handleStreaming_addEl({data : streaming_element})
       }
 
@@ -61,10 +61,10 @@ const ExcalidrawWrapper: React.FC = () => {
           totalStore[idx].angle != angle ||
           totalStore[idx].height != height ||
           totalStore[idx].width != width
-        )
+        ) as ExcalidrawCustomDTO[]
 
-        const findOwsEls = moveEls.filter(({frameId}) => frameId === getUserId)
-        const findOtherEls = moveEls.filter(({frameId}) => frameId != getUserId).map(({id}) => id)
+        const findOwsEls = moveEls.filter(({writerId}) => writerId === getUserId)
+        const findOtherEls = moveEls.filter(({writerId}) => writerId != getUserId).map(({id}) => id)
         const isFindOwsEls = Boolean(findOwsEls.length)
         const isfindOtherEls = Boolean(findOtherEls.length)
          
@@ -82,10 +82,10 @@ const ExcalidrawWrapper: React.FC = () => {
     if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {      
       if(StoreElsLeng === activeElsLeng) {
         const upDateEls = activeEls.map((el, idx) => {
-          return {...el, frameId: totalStore[idx].frameId}
+          return {...el, writerId: totalStore[idx].writerId}
         })
         const changeColorEls = upDateEls.filter(({strokeColor},idx) => totalStore[idx].strokeColor != strokeColor)
-        const findOwsEls = changeColorEls.filter(({frameId}) => frameId === getUserId)
+        const findOwsEls = changeColorEls.filter(({writerId}) => writerId === getUserId)
         const isFindOwsEls = Boolean(findOwsEls.length)
         if(isFindOwsEls) {
           handleChange_StrokeColorEls({data : findOwsEls}) 
