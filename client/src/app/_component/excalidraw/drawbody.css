@@ -57,3 +57,10 @@ button[aria-label="캔버스 초기화"]+div,
   }
 }
 
+.Checked_radioArrow {
+  position:  absolute;
+  bottom:  65px;
+  left:  20px;
+  z-index:  99999;
+}
+

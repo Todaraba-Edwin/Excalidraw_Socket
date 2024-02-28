@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation';
 // style
 import './drawbody.css'
@@ -24,6 +24,7 @@ const ExcalidrawWrapper: React.FC = () => {
   const {socketAPI} = useSocket({room_Name})
   const {
     excalidrawRef, 
+    isChecked_radioArrow,
     handleChangePointerState, 
     handleHideContextMenu,
     handleCurrentItemRoundness,
@@ -36,13 +37,17 @@ const ExcalidrawWrapper: React.FC = () => {
     handle_Reset
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
+  const [isRadioArrow, setIsRadioArrow] = useState<boolean>(false)
+  console.log(isChecked_radioArrow?.checked);
+  
+
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
   const onPointerUpdate = ({pointer, button}:{ pointer:pointerPointerType,button: pointerButtonType}) => {
     handleChangePointerState(button)
     handleStreaming_pointer(pointer)
     
   }
-  const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
+  const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => { 
     const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
     const activeElsLeng = activeEls.length || 0
 
@@ -103,6 +108,9 @@ const ExcalidrawWrapper: React.FC = () => {
     }
   }
 
+  useEffect(()=>{
+    isChecked_radioArrow && setIsRadioArrow(isChecked_radioArrow.checked)
+  },[isChecked_radioArrow?.checked])
 
   return (
       <Excalidraw
@@ -112,7 +120,10 @@ const ExcalidrawWrapper: React.FC = () => {
         onChange={onChange}
         excalidrawAPI={onExcalidrawAPI}
         onPointerUpdate={onPointerUpdate}
-        />
+        >
+          {isRadioArrow && <div className='Checked_radioArrow'>화살표 그리기를 마치시려거든 ESC 를 눌러주세요.</div>} 
+          {/* // 764가 분기 되는 화면 그 전에는 65 그 후에는 60 */}
+        </Excalidraw>
   );
 };
 export default ExcalidrawWrapper;

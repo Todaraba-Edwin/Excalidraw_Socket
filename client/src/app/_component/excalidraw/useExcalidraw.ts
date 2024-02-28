@@ -32,6 +32,8 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     const dispatch = useAppDispatch()
     const isChecked_radioLine: HTMLInputElement = document
     .querySelector(".Stack.Stack_horizontal .Island.App-toolbar .Stack.Stack_horizontal input[aria-label='선']")!;
+    const isChecked_radioArrow: HTMLInputElement = document
+    .querySelector(".Stack.Stack_horizontal .Island.App-toolbar .Stack.Stack_horizontal input[aria-label='화살표']")!;
   
     const handleStreaming_pointer = (pointer:pointerPointerType) => {
         const streamPointer = {
@@ -39,7 +41,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
             y:pointer.y,
             writerId:getUserId
         }
-        socketAPI && socketAPI.emit('stream_pointer',{ room, message: streamPointer})
+        // socketAPI && socketAPI.emit('stream_pointer',{ room, message: streamPointer})
         dispatch(setPointer(streamPointer))
     }
 
@@ -159,7 +161,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
             if(StoreElsLeng < activeElsLeng) {
                 console.log('App_toolbar', !isChecked_radioLine.checked);
                 const insertFramIdEl = cloneDeep({...activeEls.at(-1),  writerId:getUserId}) as ExcalidrawSlice.ExcalidrawCustomDTO
-                if(!isChecked_radioLine.checked) {
+                if(!isChecked_radioLine.checked && !isChecked_radioArrow.checked) {
                     handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
                     handle_addEl({data:insertFramIdEl})
                 }
@@ -195,6 +197,7 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
 
     return {
         excalidrawRef,
+        isChecked_radioArrow,
         handleChangePointerState,
         handleHideContextMenu,
         handleCurrentItemRoundness,
