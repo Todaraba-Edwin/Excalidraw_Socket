@@ -21,7 +21,7 @@ const ExcalidrawWrapper: React.FC = () => {
   const totalStore = useAppSelector(selectExcalidrawElements)
   const StoreElsLeng = totalStore.length || 0;
 
-  const {socketAPI} = useSocket({room_Name})
+  const {socketAPI, onSocket, setOnSocket} = useSocket({room_Name})
   const {
     excalidrawRef, 
     isChecked_radioArrow,
@@ -84,7 +84,7 @@ const ExcalidrawWrapper: React.FC = () => {
       }
     }
 
-    // 03 remove
+    // 03 changeColorEls
     if(appState.cursorButton === pointerStateEnm.UP && Boolean(activeElsLeng)) {      
       if(StoreElsLeng === activeElsLeng) {
         const upDateEls = activeEls.map((el, idx) => {
@@ -118,6 +118,10 @@ const ExcalidrawWrapper: React.FC = () => {
         excalidrawAPI={onExcalidrawAPI}
         onPointerUpdate={onPointerUpdate}
         >
+          <div className='join_Socket' onClick={(e)=>{
+              e.stopPropagation()
+              setOnSocket(pre => !pre)
+          }}>소켓 {`${onSocket ? '닫기': '열기'}`}</div>
           {isRadioArrow && <div className='Checked_radioArrow'>화살표 그리기를 마치시려거든 ESC 를 눌러주세요.</div>} 
           {/* // 764가 분기 되는 화면 그 전에는 65 그 후에는 60 */}
         </Excalidraw>
