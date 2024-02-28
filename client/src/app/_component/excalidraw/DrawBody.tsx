@@ -37,10 +37,7 @@ const ExcalidrawWrapper: React.FC = () => {
     handle_Reset
   } = useExcalidraw(getUserId, room_Name, socketAPI)
 
-  const [isRadioArrow, setIsRadioArrow] = useState<boolean>(false)
-  console.log(isChecked_radioArrow?.checked);
-  
-
+  const [isRadioArrow, setIsRadioArrow] = useState<boolean>(false)  
   const onExcalidrawAPI = (api: ExcalidrawTypes.ExcalidrawImperativeAPI) => excalidrawRef.current = api;
   const onPointerUpdate = ({pointer, button}:{ pointer:pointerPointerType,button: pointerButtonType}) => {
     handleChangePointerState(button)
