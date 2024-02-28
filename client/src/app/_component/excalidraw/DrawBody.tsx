@@ -43,7 +43,6 @@ const ExcalidrawWrapper: React.FC = () => {
     
   }
   const onChange = (excalidrawElements:readonly ExcalidrawElement[], appState: ExcalidrawTypes.AppState) => {    
-    
     const activeEls = excalidrawElements.filter(({isDeleted}) => !isDeleted)
     const activeElsLeng = activeEls.length || 0
 
@@ -117,19 +116,3 @@ const ExcalidrawWrapper: React.FC = () => {
   );
 };
 export default ExcalidrawWrapper;
-
-/*
-
-          {Boolean(totalPointers.length) && totalPointers
-          .map(({writerId, x, y, color}) => (
-            <div key={writerId} style={{
-              position:'absolute', 
-              width:'100px', 
-              height:'50px', 
-              background:`${color}`, 
-              top:`${y}px`, 
-              left:`${x}px`, 
-              zIndex:999999
-            }}>{writerId}</div>
-          ))}
-*/

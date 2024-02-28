@@ -30,7 +30,9 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
     const [ischangeElement, setIschangeElement] = useState<boolean>(false)
     const { handleExcalidrawSelectDispatch } = useExcalidrawSlice();
     const dispatch = useAppDispatch()
-
+    const isChecked_radioLine: HTMLInputElement = document
+    .querySelector(".Stack.Stack_horizontal .Island.App-toolbar .Stack.Stack_horizontal input[aria-label='선']")!;
+  
     const handleStreaming_pointer = (pointer:pointerPointerType) => {
         const streamPointer = {
             x:pointer.x,
@@ -155,9 +157,12 @@ export const useExcalidraw = (getUserId:string, room:string, socketAPI:SOCKETAPI
           if(Boolean(activeElsLeng)) {
             // 01 Add
             if(StoreElsLeng < activeElsLeng) {
+                console.log('App_toolbar', !isChecked_radioLine.checked);
                 const insertFramIdEl = cloneDeep({...activeEls.at(-1),  writerId:getUserId}) as ExcalidrawSlice.ExcalidrawCustomDTO
-                handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
-                handle_addEl({data:insertFramIdEl})
+                if(!isChecked_radioLine.checked) {
+                    handleExcalidrawSelectDispatch(ExcalidrawSlice.setAddEl, {message:insertFramIdEl})
+                    handle_addEl({data:insertFramIdEl})
+                }
             }
             
             // 02 Move
