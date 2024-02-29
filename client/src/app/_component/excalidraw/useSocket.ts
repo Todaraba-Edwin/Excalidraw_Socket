@@ -31,10 +31,16 @@ export const useSocket = ({room_Name}: {
     const { handleExcalidrawSelectDispatch } = useExcalidrawSlice()
     useEffect(()=>{
         if(onSocket) {
-          socketRef.current = io(SOCKET_SERVER_URL) 
+          socketRef.current = io(SOCKET_SERVER_URL, {
+            path: '/admin/canvas/socket.io',
+          }) 
+
           if(socketRef.current) {
               const socket = socketRef.current
               socket.on("connect", () => {
+                socket.on("error", (error:any) => {
+                  console.error("Socket connection error:", error);
+                });
                 socket.emit("join_room", room_Name);
   
                   socket.on('stream_receive_message', (data:MESSAGE_ElProps) => {   
