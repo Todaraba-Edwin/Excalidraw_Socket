@@ -32,7 +32,7 @@ export const useSocket = ({room_Name}: {
     useEffect(()=>{
         if(onSocket) {
           socketRef.current = io(SOCKET_SERVER_URL, {
-            path: '/admin/canvas/socket.io',
+            path: '/admin/canvas',
           }) 
 
           if(socketRef.current) {

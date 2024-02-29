@@ -10,7 +10,7 @@ app.use(cors());
 const server = http.createServer(app)
 
 const io = new Server(server, {
-  path: '/admin/canvas/socket.io',
+  path: '/admin/canvas',
   cors : {
     origin:"http://localhost:3001",
     methods: ["GET", "POST"]
